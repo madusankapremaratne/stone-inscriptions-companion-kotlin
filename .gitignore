@@ -1,0 +1,38 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+.gradle/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild
+.cxx/
+local.properties
+
+# OS & Temp files
+.DS_Store
+Thumbs.db
+scratch/
+__pycache__/
+*.pyc
+
+# Local docs / raw materials
+docs/
+
