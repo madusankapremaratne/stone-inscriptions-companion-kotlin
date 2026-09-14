@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">செல்லிபி AR துணை</string>
+    <string name="app_tagline">பண்டைய இலங்கை கல்வெட்டு வழிகாட்டி</string>
+    
+    <!-- Navigation & General -->
+    <string name="nav_home">தொல்பொருள் தளங்கள்</string>
+    <string name="nav_evolution">எழுத்து பரிணாமம்</string>
+    <string name="nav_researcher">ஆராய்ச்சியாளர் கருவி</string>
+    <string name="language_si">සිංහල</string>
+    <string name="language_ta">தமிழ்</string>
+    <string name="language_en">English</string>
+    <string name="sunlight_mode">சூரிய ஒளிக்கான உயர்-மாறுபாடு</string>
+    <string name="switch_language">மொழியை மாற்றவும்</string>
+
+    <!-- Home & Site Explorer -->
+    <string name="nearby_sites">அருகிலுள்ள தொல்பொருள் தளங்கள்</string>
+    <string name="all_sites">பதிவுசெய்யப்பட்ட அனைத்து தளங்கள்</string>
+    <string name="distance_meters">%1$d மீ தொலைவில்</string>
+    <string name="distance_km">%.1f கி.மீ தொலைவில்</string>
+    <string name="search_inscriptions_hint">கல்வெட்டுகள், மன்னர்கள், தளங்களைத் தேடுக…</string>
+    <string name="registered_inscriptions">%1$d கல்வெட்டுகள் பதிவு செய்யப்பட்டுள்ளன</string>
+
+    <!-- Inscription Detail -->
+    <string name="chronological_period">வரலாற்று காலம்</string>
+    <string name="dating_basis">காலக்கணிப்பு முறை</string>
+    <string name="source_citation">மூலக் குறிப்பு</string>
+    <string name="launch_overlay_mode">மேலடுக்கு முறை (பொதுவானது)</string>
+    <string name="launch_overlay_desc">4-புள்ளி அமைப்பின் மூலம் அனைத்து சாதனங்களிலும் இயங்கும்.</string>
+    <string name="launch_ar_mode">AR முறை (ARCore)</string>
+    <string name="launch_ar_desc">கல்வெட்டின் மீது நேரடியாக தோன்றும் 3D உரை காட்சி.</string>
+    <string name="ar_not_supported_msg">இச்சாதனத்தில் ARCore கிடைக்கவில்லை. மேலடுக்கு முறை பரிந்துரைக்கப்படுகிறது.</string>
+    <string name="transcription_preview">வெளியிடப்பட்ட கல்வெட்டு உரை</string>
+
+    <!-- Overlay Mode -->
+    <string name="align_instruction">கல்வெட்டு உரையுடன் பொருந்த 4 மூலைகளை இழுத்து சரிசெய்யவும்.</string>
+    <string name="freeze_frame">படத்தை உறைய வைக்கவும்</string>
+    <string name="unfreeze_frame">கேமராவை மீண்டும் இயக்கவும்</string>
+    <string name="tap_letter_prompt">எழுத்தின் பரிணாமத்தைக் காண எந்த எழுத்தையும் தொடவும்.</string>
+
+    <!-- AR Mode -->
+    <string name="ar_scanning">கல்வெட்டை நோக்கி கேமராவைக் காட்டவும்…</string>
+    <string name="ar_tracking_active">கல்வெட்டு அடையாளம் காணப்பட்டது! 3D பார்வை தயார்.</string>
+    <string name="ar_tracking_lost">தடமறிதல் தவறிவிட்டது. மேலடுக்கு முறைக்கு மாறவும்.</string>
+    <string name="switch_to_overlay">மேலடுக்கு முறைக்கு மாறவும்</string>
+
+    <!-- Letter Evolution -->
+    <string name="letter_evolution_title">எழுத்து பரிணாமப் பாதை</string>
+    <string name="timeline_scrubber">வரலாற்று காலக்கோடு (கி.மு. 3 – கி.பி. 10ஆம் நூற்றாண்டு)</string>
+    <string name="gap_detected_title">தொல்பொருள் பதிவில் இடைவெளி</string>
+    <string name="gap_detected_desc">இக்காலகட்டத்திற்கான சான்றுகள் கிடைக்கவில்லை. இடைவெளியாக காட்டப்படுகிறது.</string>
+    <string name="attested_form_title">சான்றளிக்கப்பட்ட வரலாற்று வடிவம்</string>
+    <string name="modern_character">நவீன எழுத்து</string>
+    <string name="iso_romanisation">ISO ரோமானிய வடிவம்</string>
+    <string name="character_name">பாரம்பரிய பெயர்</string>
+
+    <!-- Researcher Mode -->
+    <string name="researcher_title">ஆராய்ச்சியாளர் களக் கருவி</string>
+    <string name="researcher_gate_prompt">களப் படங்களை எடுக்க கடவுச்சொல்லை உள்ளிடவும்.</string>
+    <string name="coverage_dome_title">பல கோண வழிகாட்டுதல்</string>
+    <string name="capture_frame">அளவீட்டுப் படம் எடுக்கவும்</string>
+    <string name="coverage_complete">முழுமையானது (%1$d/%2$d பகுதிகள் எடுக்கப்பட்டன)</string>
+    <string name="telemetry_pose">6-DoF கோண அணி</string>
+    <string name="telemetry_scale">ஒளியியல் அளவுகோல்</string>
+    <string name="telemetry_gps">GPS அமைவிடம்</string>
+    <string name="export_bundle">தரவுத் தொகுப்பை ஏற்றுமதி செய்க</string>
+    <string name="export_success">கோப்பு சேமிக்கப்பட்டது: %1$s</string>
+</resources>

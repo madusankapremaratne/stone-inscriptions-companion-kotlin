@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sellipi AR Companion</string>
+    <string name="app_tagline">Ancient Sri Lankan Inscriptions Companion</string>
+    
+    <!-- Navigation & General -->
+    <string name="nav_home">Explore Sites</string>
+    <string name="nav_evolution">Letter Evolution</string>
+    <string name="nav_researcher">Researcher Mode</string>
+    <string name="language_si">සිංහල</string>
+    <string name="language_ta">தமிழ்</string>
+    <string name="language_en">English</string>
+    <string name="sunlight_mode">High-Contrast Sunlight Mode</string>
+    <string name="switch_language">Switch Language</string>
+
+    <!-- Home & Site Explorer -->
+    <string name="nearby_sites">Nearby Archaeological Reserves</string>
+    <string name="all_sites">All Registered Sites</string>
+    <string name="distance_meters">%1$d m away</string>
+    <string name="distance_km">%.1f km away</string>
+    <string name="search_inscriptions_hint">Search inscriptions, kings, sites…</string>
+    <string name="registered_inscriptions">%1$d Inscriptions Registered</string>
+
+    <!-- Inscription Detail -->
+    <string name="chronological_period">Chronological Period</string>
+    <string name="dating_basis">Dating Basis</string>
+    <string name="source_citation">Scholarly Citation</string>
+    <string name="launch_overlay_mode">Launch Overlay Mode (Universal)</string>
+    <string name="launch_overlay_desc">Works on all devices with manual 4-point homography alignment.</string>
+    <string name="launch_ar_mode">Launch AR Mode (ARCore)</string>
+    <string name="launch_ar_desc">Augmented image tracking anchored directly to the inscription surface.</string>
+    <string name="ar_not_supported_msg">ARCore is not available on this device. Overlay mode is recommended.</string>
+    <string name="transcription_preview">Published Scholarly Transcription</string>
+
+    <!-- Overlay Mode -->
+    <string name="align_instruction">Drag the 4 corner handles to align the transcription frame with the stone text.</string>
+    <string name="freeze_frame">Freeze Frame</string>
+    <string name="unfreeze_frame">Resume Live Camera</string>
+    <string name="tap_letter_prompt">Tap any letter to view its diachronic evolution across 18 historical periods.</string>
+
+    <!-- AR Mode -->
+    <string name="ar_scanning">Aim camera at the flat inscription face…</string>
+    <string name="ar_tracking_active">Surface tracked! 3D transcription locked.</string>
+    <string name="ar_tracking_lost">Tracking lost. Move camera closer or switch to Overlay Mode.</string>
+    <string name="switch_to_overlay">Switch to Overlay Mode</string>
+
+    <!-- Letter Evolution -->
+    <string name="letter_evolution_title">Diachronic Letter Evolution</string>
+    <string name="timeline_scrubber">Historical Timeline (3rd c. BCE – 10th c. CE)</string>
+    <string name="gap_detected_title">Archaeological Record Gap</string>
+    <string name="gap_detected_desc">No attested letterform exists in the epigraphical record for this historical period. Displayed honestly as a gap.</string>
+    <string name="attested_form_title">Attested Epigraphical Form</string>
+    <string name="modern_character">Modern Character</string>
+    <string name="iso_romanisation">ISO Romanisation</string>
+    <string name="character_name">Traditional Name</string>
+
+    <!-- Researcher Mode -->
+    <string name="researcher_title">Researcher Field Capture</string>
+    <string name="researcher_gate_prompt">Enter Researcher Passcode to unlock calibrated field capture.</string>
+    <string name="coverage_dome_title">Multi-Angle Coverage Guidance</string>
+    <string name="capture_frame">Capture Calibrated Frame</string>
+    <string name="coverage_complete">Coverage complete (%1$d/%2$d sectors captured)</string>
+    <string name="telemetry_pose">6-DoF Pose Matrix</string>
+    <string name="telemetry_scale">Optical Scale</string>
+    <string name="telemetry_gps">GPS Coordinates</string>
+    <string name="export_bundle">Export Encrypted Dataset Bundle</string>
+    <string name="export_success">Dataset saved to device storage: %1$s</string>
+</resources>

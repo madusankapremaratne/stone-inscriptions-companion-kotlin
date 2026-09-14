@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">සෙල්ලිපි AR සහකරු</string>
+    <string name="app_tagline">පුරාණ ශ්‍රී ලාංකේය සෙල්ලිපි සහායක</string>
+    
+    <!-- Navigation & General -->
+    <string name="nav_home">පුරාවිද්‍යා ස්ථාන</string>
+    <string name="nav_evolution">අක්ෂර පරිණාමය</string>
+    <string name="nav_researcher">පර්යේෂක මෙවලම</string>
+    <string name="language_si">සිංහල</string>
+    <string name="language_ta">தமிழ்</string>
+    <string name="language_en">English</string>
+    <string name="sunlight_mode">දැඩි හිරු එළිය සඳහා අධි-විභේදනය</string>
+    <string name="switch_language">භාෂාව මාරු කරන්න</string>
+
+    <!-- Home & Site Explorer -->
+    <string name="nearby_sites">ආසන්න පුරාවිද්‍යා පරිශ්‍ර</string>
+    <string name="all_sites">සියලුම ලියාපදිංචි ස්ථාන</string>
+    <string name="distance_meters">මීටර %1$d ක් දුරින්</string>
+    <string name="distance_km">කි.මී. %.1f ක් දුරින්</string>
+    <string name="search_inscriptions_hint">සෙල්ලිපි, රජවරුන්, ස්ථාන සොයන්න…</string>
+    <string name="registered_inscriptions">සෙල්ලිපි %1$d ක් ලියාපදිංචි කර ඇත</string>
+
+    <!-- Inscription Detail -->
+    <string name="chronological_period">ඓතිහාසික කාලපරිච්ඡේදය</string>
+    <string name="dating_basis">කාලනිර්ණය පදනම</string>
+    <string name="source_citation">මූලාශ්‍ර උපුටා ගැනීම</string>
+    <string name="launch_overlay_mode">ඕවර්ලේ ආකාරය (සාමාන්‍ය)</string>
+    <string name="launch_overlay_desc">ලක්ෂ්‍ය 4 කෝණ ගැළපීම මගින් ඕනෑම දුරකථනයක ක්‍රියා කරයි.</string>
+    <string name="launch_ar_mode">AR ආකාරය (ARCore)</string>
+    <string name="launch_ar_desc">සෙල්ලිපි පෘෂ්ඨය මත කෙළින්ම ස්ථානගත වන 3D පෙළ දසුන.</string>
+    <string name="ar_not_supported_msg">මෙම දුරකථනයෙහි ARCore සහාය නොදක්වයි. ඕවර්ලේ ආකාරය නිර්දේශ කෙරේ.</string>
+    <string name="transcription_preview">පළ කළ විද්වත් අර්ථකථනය</string>
+
+    <!-- Overlay Mode -->
+    <string name="align_instruction">සෙල්ලිපියේ පෙළ කොටසට සරිලන පරිදි කොන් 4 සකසන්න.</string>
+    <string name="freeze_frame">රූපය නිශ්චල කරන්න</string>
+    <string name="unfreeze_frame">සජීවී කැමරාව නැවත අරඹන්න</string>
+    <string name="tap_letter_prompt">ඕනෑම අකුරක් මත ස්පර්ශ කර එහි යුග 18 පුරා පරිණාමය නරඹන්න.</string>
+
+    <!-- AR Mode -->
+    <string name="ar_scanning">කැමරාව සෙල්ලිපි පෘෂ්ඨය දෙසට යොමු කරන්න…</string>
+    <string name="ar_tracking_active">සෙල්ලිපිය හඳුනාගන්නා ලදී! 3D දසුන සක්‍රියයි.</string>
+    <string name="ar_tracking_lost">හඳුනාගැනීම ගිලිහී ගියේය. කැමරාව සමීප කරන්න හෝ ඕවර්ලේ ආකාරය තෝරන්න.</string>
+    <string name="switch_to_overlay">ඕවර්ලේ ආකාරයට මාරු වන්න</string>
+
+    <!-- Letter Evolution -->
+    <string name="letter_evolution_title">අක්ෂර පරිණාම ගමන්මග</string>
+    <string name="timeline_scrubber">ඓතිහාසික කාල රේඛාව (ක්‍රි.පූ. 3 වන සියවස – ක්‍රි.ව. 10 වන සියවස)</string>
+    <string name="gap_detected_title">පුරාවිද්‍යාත්මක වාර්තාවේ හිඩැසක්</string>
+    <string name="gap_detected_desc">මෙම ඓතිහාසික යුගය සඳහා සාධක හමු වී නොමැත. එය අවංකව හිඩැසක් ලෙස දක්වා ඇත.</string>
+    <string name="attested_form_title">සාධක සහිත ඓතිහාසික අක්ෂර රූපය</string>
+    <string name="modern_character">නූතන අක්ෂරය</string>
+    <string name="iso_romanisation">ISO රෝමානුකරණය</string>
+    <string name="character_name">සාම්ප්‍රදායික නාමය</string>
+
+    <!-- Researcher Mode -->
+    <string name="researcher_title">පර්යේෂක ක්ෂේත්‍ර දත්ත මෙවලම</string>
+    <string name="researcher_gate_prompt">ක්ෂේත්‍ර දත්ත ලබාගැනීම සඳහා පර්යේෂක මුරපදය ඇතුළත් කරන්න.</string>
+    <string name="coverage_dome_title">බහුවිධ කෝණ ආවරණ මාර්ගෝපදේශය</string>
+    <string name="capture_frame">මානගත ඡායාරූපය ලබාගන්න</string>
+    <string name="coverage_complete">ආවරණය සම්පූර්ණයි (කලාප %1$d/%2$d ක් සටහන් විය)</string>
+    <string name="telemetry_pose">6-DoF ඉරියව් න්‍යාසය</string>
+    <string name="telemetry_scale">දෘශ්‍ය පරිමාණය</string>
+    <string name="telemetry_gps">GPS ඛණ්ඩාංක</string>
+    <string name="export_bundle">දත්ත ගොනුව අපනයනය කරන්න</string>
+    <string name="export_success">දත්ත ගොනුව සුරකින ලදී: %1$s</string>
+</resources>

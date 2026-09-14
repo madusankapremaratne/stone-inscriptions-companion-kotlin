@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="stone_dark">#121110</color>
+    <color name="stone_surface">#1C1A18</color>
+    <color name="stone_surface_variant">#2A2724</color>
+    <color name="terracotta_primary">#E06D3B</color>
+    <color name="terracotta_container">#4E210E</color>
+    <color name="gold_patina">#FFD54F</color>
+    <color name="sandstone_light">#F5EBE1</color>
+    <color name="ancient_granite">#3E3935</color>
+</resources>
