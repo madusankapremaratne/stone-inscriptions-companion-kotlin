@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,10 +68,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import org.sellipi.companion.R
 import org.sellipi.companion.core.theme.GoldPatina
+import org.sellipi.companion.core.theme.Stone700
+import org.sellipi.companion.core.theme.Stone800
 import org.sellipi.companion.core.theme.Stone900
 import org.sellipi.companion.core.theme.TerracottaPrimary
 import org.sellipi.companion.domain.model.QuadPoint
 import org.sellipi.companion.engine.homography.HomographyCalculator
+import org.sellipi.companion.ui.agent.AgenticWorkflowBottomSheet
 import kotlin.math.hypot
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +89,7 @@ fun CameraOverlayScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val agentSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val homographyCalculator = remember { HomographyCalculator() }
 
     Scaffold(
@@ -249,7 +255,7 @@ fun CameraOverlayScreen(
                     color = Stone900.copy(alpha = 0.85f)
                 ) {
                     Text(
-                        text = "Touch any letter to inspect evolution",
+                        text = "Touch any letter or use Agentic Scan",
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = GoldPatina
@@ -268,21 +274,38 @@ fun CameraOverlayScreen(
                 }
             }
 
-            // Bottom Alignment Prompt Banner
+            // Bottom Alignment & Agentic Scan Action Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .padding(16.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Stone900.copy(alpha = 0.9f))
+                colors = CardDefaults.cardColors(containerColor = Stone900.copy(alpha = 0.92f))
             ) {
-                Text(
-                    text = stringResource(R.string.align_instruction),
-                    modifier = Modifier.padding(14.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White
-                )
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = stringResource(R.string.align_instruction),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = { viewModel.triggerAgenticScan() },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = TerracottaPrimary)
+                        ) {
+                            Icon(Icons.Default.Psychology, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Agentic Identification & SLM Flow")
+                        }
+                    }
+                }
             }
         }
 
@@ -316,12 +339,33 @@ fun CameraOverlayScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                val codepoint = glyph.letter?.modernSinhalaCodepoint ?: "Glyph"
+                                viewModel.dismissGlyphSheet()
+                                viewModel.triggerAgenticScan("Analyzing selected stone glyph '$codepoint' with crossbar and vertical stem features.")
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.Psychology, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Agentic Verify")
+                        }
+
                         Button(
                             onClick = {
                                 val letterId = glyph.letterId
                                 viewModel.dismissGlyphSheet()
                                 onNavigateToLetterEvolution(letterId)
                             },
+                            modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = TerracottaPrimary),
                             shape = RoundedCornerShape(10.dp)
                         ) {
@@ -333,6 +377,16 @@ fun CameraOverlayScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
+        }
+
+        // Live Agentic Workflow Modal Bottom Sheet
+        if (state.isAgentSheetVisible) {
+            AgenticWorkflowBottomSheet(
+                state = state.agentState,
+                onDismiss = viewModel::dismissAgentSheet,
+                onApproveAndLearn = viewModel::approveAndLearnCandidate,
+                sheetState = agentSheetState
+            )
         }
     }
 }

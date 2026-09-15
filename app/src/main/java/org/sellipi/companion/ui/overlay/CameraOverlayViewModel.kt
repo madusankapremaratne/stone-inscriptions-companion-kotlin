@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.sellipi.companion.agent.EpigraphicAgentOrchestrator
+import org.sellipi.companion.agent.model.AgentWorkflowState
+import org.sellipi.companion.agent.model.GlyphCandidate
 import org.sellipi.companion.domain.model.GlyphOccurrence
 import org.sellipi.companion.domain.model.Inscription
 import org.sellipi.companion.domain.model.InscriptionQuad
@@ -30,12 +33,15 @@ data class CameraOverlayUiState(
     val homographyMatrix: FloatArray = FloatArray(9),
     val selectedGlyph: GlyphOccurrence? = null,
     val isFrozen: Boolean = false,
+    val isAgentSheetVisible: Boolean = false,
+    val agentState: AgentWorkflowState = AgentWorkflowState(),
     val isLoading: Boolean = true
 )
 
 class CameraOverlayViewModel(
     private val inscriptionId: String,
     private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase,
+    val agentOrchestrator: EpigraphicAgentOrchestrator,
     private val homographyCalculator: HomographyCalculator = HomographyCalculator()
 ) : ViewModel() {
 
@@ -50,14 +56,26 @@ class CameraOverlayViewModel(
     )
     private val _selectedGlyph = MutableStateFlow<GlyphOccurrence?>(null)
     private val _isFrozen = MutableStateFlow(false)
+    private val _isAgentSheetVisible = MutableStateFlow(false)
 
     val uiState: StateFlow<CameraOverlayUiState> = combine(
         _inscription,
         getInscriptionDetailsUseCase.getTranscriptionWithGlyphs(inscriptionId),
         _quad,
         _selectedGlyph,
-        _isFrozen
-    ) { insc, lines, quad, selectedGlyph, isFrozen ->
+        _isFrozen,
+        _isAgentSheetVisible,
+        agentOrchestrator.state
+    ) { params ->
+        val insc = params[0] as Inscription?
+        @Suppress("UNCHECKED_CAST")
+        val lines = params[1] as List<TranscriptionLine>
+        val quad = params[2] as InscriptionQuad
+        val selectedGlyph = params[3] as GlyphOccurrence?
+        val isFrozen = params[4] as Boolean
+        val isAgentSheetVisible = params[5] as Boolean
+        val agentState = params[6] as AgentWorkflowState
+
         val matrix = homographyCalculator.computeHomographyMatrix(quad)
         CameraOverlayUiState(
             inscription = insc,
@@ -66,6 +84,8 @@ class CameraOverlayViewModel(
             homographyMatrix = matrix,
             selectedGlyph = selectedGlyph,
             isFrozen = isFrozen,
+            isAgentSheetVisible = isAgentSheetVisible,
+            agentState = agentState,
             isLoading = insc == null
         )
     }.stateIn(
@@ -119,13 +139,42 @@ class CameraOverlayViewModel(
         _selectedGlyph.value = null
     }
 
+    fun triggerAgenticScan(strokeDescription: String = "Symmetrical intersecting perpendicular vertical and horizontal strokes with weathered apex") {
+        _isAgentSheetVisible.value = true
+        val era = _inscription.value?.let { "${it.dateRangeStart} to ${it.dateRangeEnd} (${it.datingBasis})" } ?: "3rd c. BCE Early Brahmi"
+        val site = _inscription.value?.sourceCitation ?: "Cave Inscription"
+        val line = _inscription.value?.nameSi ?: "දෙවනපිය මහරඣහ ගමිණි තිශහ ලෙණෙ"
+
+        viewModelScope.launch {
+            agentOrchestrator.runAgenticIdentification(
+                strokeDescription = strokeDescription,
+                inscriptionId = inscriptionId,
+                inscriptionEra = era,
+                lineContext = line,
+                siteContext = site
+            )
+        }
+    }
+
+    fun dismissAgentSheet() {
+        _isAgentSheetVisible.value = false
+        agentOrchestrator.reset()
+    }
+
+    fun approveAndLearnCandidate(candidate: GlyphCandidate) {
+        viewModelScope.launch {
+            agentOrchestrator.approveAndLearnCandidate(candidate, inscriptionId)
+        }
+    }
+
     class Factory(
         private val inscriptionId: String,
-        private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase
+        private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase,
+        private val agentOrchestrator: EpigraphicAgentOrchestrator
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return CameraOverlayViewModel(inscriptionId, getInscriptionDetailsUseCase) as T
+            return CameraOverlayViewModel(inscriptionId, getInscriptionDetailsUseCase, agentOrchestrator) as T
         }
     }
 }

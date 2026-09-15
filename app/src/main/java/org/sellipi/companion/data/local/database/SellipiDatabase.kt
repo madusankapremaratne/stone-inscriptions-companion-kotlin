@@ -29,7 +29,8 @@ import org.sellipi.companion.data.local.entity.TranscriptionLineEntity
         InscriptionEntity::class,
         TranscriptionLineEntity::class,
         GlyphOccurrenceEntity::class,
-        CaptureSessionEntity::class
+        CaptureSessionEntity::class,
+        org.sellipi.companion.data.local.entity.LearnedGlyphEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -42,6 +43,7 @@ abstract class SellipiDatabase : RoomDatabase() {
     abstract fun letterFormDao(): LetterFormDao
     abstract fun transcriptionDao(): TranscriptionDao
     abstract fun captureDao(): CaptureDao
+    abstract fun learnedGlyphDao(): org.sellipi.companion.data.local.dao.LearnedGlyphDao
 
     companion object {
         @Volatile
