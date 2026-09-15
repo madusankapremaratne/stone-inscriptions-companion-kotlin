@@ -12,6 +12,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import org.sellipi.companion.agent.EpigraphicAgentOrchestrator
+import org.sellipi.companion.agent.EpigraphicCriticAgent
+import org.sellipi.companion.agent.EpigraphicIdentifyAgent
+import org.sellipi.companion.agent.EpigraphicLearningAgent
 import org.sellipi.companion.core.common.AppLanguage
 import org.sellipi.companion.core.navigation.Screen
 import org.sellipi.companion.data.local.database.SellipiDatabase
@@ -25,6 +29,7 @@ import org.sellipi.companion.domain.usecase.GetNearbySitesUseCase
 import org.sellipi.companion.domain.usecase.SaveResearcherCaptureUseCase
 import org.sellipi.companion.engine.ar.ArCoreSessionManager
 import org.sellipi.companion.engine.sensor.SensorFusionEngine
+import org.sellipi.companion.engine.slm.LocalEpigraphicSlmEngine
 import org.sellipi.companion.ui.ar.ArViewModel
 import org.sellipi.companion.ui.ar.ArViewScreen
 import org.sellipi.companion.ui.evolution.LetterEvolutionScreen
@@ -56,6 +61,13 @@ fun SellipiNavHost(
 
     val sensorEngine = SensorFusionEngine(context)
     val arSessionManager = ArCoreSessionManager(context)
+
+    // SLM & Multi-Agent Workflow Engine
+    val slmEngine = LocalEpigraphicSlmEngine()
+    val identifyAgent = EpigraphicIdentifyAgent(slmEngine)
+    val criticAgent = EpigraphicCriticAgent(slmEngine)
+    val learningAgent = EpigraphicLearningAgent(db.learnedGlyphDao(), db.letterFormDao())
+    val agentOrchestrator = EpigraphicAgentOrchestrator(identifyAgent, criticAgent, learningAgent)
 
     val getNearbySitesUseCase = GetNearbySitesUseCase(siteRepo)
     val getInscriptionDetailsUseCase = GetInscriptionDetailsUseCase(inscriptionRepo, evolutionRepo)
@@ -107,14 +119,14 @@ fun SellipiNavHost(
             )
         }
 
-        // 3. CameraX 4-Point Overlay Alignment Screen
+        // 3. CameraX 4-Point Overlay Alignment Screen (With Agentic Identification)
         composable(
             route = Screen.OverlayMode.route,
             arguments = listOf(navArgument("inscriptionId") { type = NavType.StringType })
         ) { backStackEntry ->
             val inscriptionId = backStackEntry.arguments?.getString("inscriptionId") ?: "INSC_ANP_01"
             val overlayViewModel: CameraOverlayViewModel = viewModel(
-                factory = CameraOverlayViewModel.Factory(inscriptionId, getInscriptionDetailsUseCase)
+                factory = CameraOverlayViewModel.Factory(inscriptionId, getInscriptionDetailsUseCase, agentOrchestrator)
             )
             CameraOverlayScreen(
                 viewModel = overlayViewModel,
