@@ -20,6 +20,8 @@ import shutil
 import sqlite3
 import sys
 
+from room_schema import KNOWLEDGE_TABLES
+
 ASSET_DB = 'app/src/main/assets/databases/sellipi.db'
 DATA_DB_COPY = 'data/sellipi.db'
 CARDS_DIR = 'data/knowledge/cards'
@@ -30,14 +32,6 @@ ALIAS_LANGS = {'en', 'si', 'ta', 'roman'}
 LANGS = ('en', 'si', 'ta')
 MAX_BODY_WORDS = 150
 ID_PATTERN = re.compile(r'^(person|place|term|period|event)\.[a-z0-9_]+$')
-
-# Must match Room's generated schema for the entities in
-# app/src/main/java/org/sellipi/companion/data/local/entity/KnowledgeEntities.kt exactly.
-SCHEMA = '''
-CREATE TABLE IF NOT EXISTS `knowledge_cards` (`id` TEXT NOT NULL, `kind` TEXT NOT NULL, `title_en` TEXT NOT NULL, `title_si` TEXT, `title_ta` TEXT, `body_en` TEXT NOT NULL, `body_si` TEXT, `body_ta` TEXT, `sources` TEXT NOT NULL, `confidence_note` TEXT, `curation_status` TEXT NOT NULL, PRIMARY KEY(`id`));
-CREATE TABLE IF NOT EXISTS `entity_aliases` (`alias` TEXT NOT NULL, `card_id` TEXT NOT NULL, `lang` TEXT NOT NULL, `ambiguous` INTEGER NOT NULL, PRIMARY KEY(`alias`, `card_id`));
-CREATE TABLE IF NOT EXISTS `card_links` (`card_id` TEXT NOT NULL, `target_type` TEXT NOT NULL, `target_id` TEXT NOT NULL, PRIMARY KEY(`card_id`, `target_type`, `target_id`));
-'''
 
 
 def fold(text):
@@ -157,7 +151,8 @@ def write(conn, cards):
         DROP TABLE IF EXISTS entity_aliases;
         DROP TABLE IF EXISTS card_links;
     ''')
-    cur.executescript(SCHEMA)
+    for _, ddl in KNOWLEDGE_TABLES:
+        cur.execute(ddl)
     for card in cards:
         title, body = card['title'], card['body']
         cur.execute(

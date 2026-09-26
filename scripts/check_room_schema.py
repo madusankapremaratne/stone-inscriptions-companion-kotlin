@@ -82,14 +82,20 @@ def main():
         for name in sorted(expected_idx - actual_idx):
             notes.append(f'{table}: index {name} absent; Room creates it on first open (asset user_version 0)')
 
-        expected_fks = {(fk['table'], tuple(fk['columns']), tuple(fk['referencedColumns'])) for fk in entity.get('foreignKeys', [])}
-        rows = list(conn.execute(f'PRAGMA foreign_key_list(`{table}`)'))
-        actual_fks = {}
-        for r in rows:
-            actual_fks.setdefault(r[0], [r[2], [], []])
-            actual_fks[r[0]][1].append(r[3])
-            actual_fks[r[0]][2].append(r[4])
-        actual_fks = {(t, tuple(c), tuple(rc)) for t, c, rc in actual_fks.values()}
+        expected_fks = {
+            (fk['table'], tuple(fk['columns']), tuple(fk['referencedColumns']), fk['onDelete'], fk['onUpdate'])
+            for fk in entity.get('foreignKeys', [])
+        }
+        # PRAGMA foreign_key_list: id, seq, table, from, to, on_update, on_delete, match
+        grouped = {}
+        for r in conn.execute(f'PRAGMA foreign_key_list(`{table}`)'):
+            fk = grouped.setdefault(r[0], {'table': r[2], 'from': [], 'to': [], 'on_update': r[5], 'on_delete': r[6]})
+            fk['from'].append(r[3])
+            fk['to'].append(r[4])
+        actual_fks = {
+            (fk['table'], tuple(fk['from']), tuple(fk['to']), fk['on_delete'], fk['on_update'])
+            for fk in grouped.values()
+        }
         if expected_fks != actual_fks:
             problems.append(f'{table}: foreign keys {sorted(actual_fks)}, Room expects {sorted(expected_fks)}')
 

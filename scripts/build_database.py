@@ -11,6 +11,8 @@ import zipfile
 import sqlite3
 import xml.etree.ElementTree as ET
 
+from room_schema import create_content_schema
+
 def build_database():
     excel_path = 'docs/Ancient_Letter_Table.xlsx'
     if not os.path.exists(excel_path):
@@ -53,119 +55,8 @@ def build_database():
     cur = conn.cursor()
     cur.execute('PRAGMA foreign_keys = ON;')
 
-    # 2. Schema Creation
-    cur.executescript('''
-    CREATE TABLE IF NOT EXISTS sites (
-        id TEXT PRIMARY KEY,
-        name_si TEXT NOT NULL,
-        name_ta TEXT NOT NULL,
-        name_en TEXT NOT NULL,
-        latitude REAL NOT NULL,
-        longitude REAL NOT NULL,
-        geofence_radius_m REAL NOT NULL,
-        permit_reference TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS periods (
-        id TEXT PRIMARY KEY,
-        period_number INTEGER NOT NULL,
-        label_si TEXT NOT NULL,
-        label_ta TEXT NOT NULL,
-        label_en TEXT NOT NULL,
-        year_start INTEGER NOT NULL,
-        year_end INTEGER NOT NULL,
-        chart_column_refs TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS letters (
-        id TEXT PRIMARY KEY,
-        row_index INTEGER NOT NULL,
-        modern_sinhala_codepoint TEXT NOT NULL,
-        romanisation TEXT NOT NULL,
-        letter_name TEXT NOT NULL,
-        glyph_image_path TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS letter_forms (
-        id TEXT PRIMARY KEY,
-        letter_id TEXT NOT NULL,
-        period_id TEXT NOT NULL,
-        grid_row INTEGER NOT NULL,
-        grid_col INTEGER NOT NULL,
-        vector_path TEXT,
-        image_asset_path TEXT,
-        is_attested INTEGER NOT NULL DEFAULT 0,
-        is_reconstructed INTEGER NOT NULL DEFAULT 0,
-        source_inscription_ref TEXT,
-        provenance TEXT NOT NULL DEFAULT 'authentic_epigraphic',
-        FOREIGN KEY(letter_id) REFERENCES letters(id) ON DELETE CASCADE,
-        FOREIGN KEY(period_id) REFERENCES periods(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS inscriptions (
-        id TEXT PRIMARY KEY,
-        site_id TEXT NOT NULL,
-        name_si TEXT NOT NULL,
-        name_ta TEXT NOT NULL,
-        name_en TEXT NOT NULL,
-        date_range_start INTEGER NOT NULL,
-        date_range_end INTEGER NOT NULL,
-        dating_basis TEXT NOT NULL,
-        primary_period_id TEXT NOT NULL,
-        reference_photo TEXT,
-        arcore_target_score INTEGER NOT NULL DEFAULT 0,
-        alignment_strategy TEXT NOT NULL,
-        source_citation TEXT NOT NULL,
-        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE,
-        FOREIGN KEY(primary_period_id) REFERENCES periods(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS transcription_lines (
-        id TEXT PRIMARY KEY,
-        inscription_id TEXT NOT NULL,
-        line_number INTEGER NOT NULL,
-        text_original TEXT NOT NULL,
-        text_modern_sinhala TEXT NOT NULL,
-        translation_si TEXT NOT NULL,
-        translation_ta TEXT NOT NULL,
-        translation_en TEXT NOT NULL,
-        FOREIGN KEY(inscription_id) REFERENCES inscriptions(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS glyph_occurrences (
-        id TEXT PRIMARY KEY,
-        transcription_line_id TEXT NOT NULL,
-        position INTEGER NOT NULL,
-        letter_id TEXT NOT NULL,
-        bbox_x REAL NOT NULL,
-        bbox_y REAL NOT NULL,
-        bbox_w REAL NOT NULL,
-        bbox_h REAL NOT NULL,
-        FOREIGN KEY(transcription_line_id) REFERENCES transcription_lines(id) ON DELETE CASCADE,
-        FOREIGN KEY(letter_id) REFERENCES letters(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS capture_sessions (
-        id TEXT PRIMARY KEY,
-        inscription_id TEXT NOT NULL,
-        device_model TEXT NOT NULL,
-        timestamp INTEGER NOT NULL,
-        gps_lat REAL NOT NULL,
-        gps_lon REAL NOT NULL,
-        gps_accuracy REAL NOT NULL,
-        pose_matrix TEXT NOT NULL,
-        scale_mm_per_px REAL NOT NULL,
-        image_paths TEXT NOT NULL,
-        permit_reference TEXT NOT NULL,
-        FOREIGN KEY(inscription_id) REFERENCES inscriptions(id) ON DELETE CASCADE
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_inscriptions_site ON inscriptions(site_id);
-    CREATE INDEX IF NOT EXISTS idx_transcription_lines_insc ON transcription_lines(inscription_id);
-    CREATE INDEX IF NOT EXISTS idx_glyph_occurrences_line ON glyph_occurrences(transcription_line_id);
-    CREATE INDEX IF NOT EXISTS idx_glyph_occurrences_letter ON glyph_occurrences(letter_id);
-    CREATE INDEX IF NOT EXISTS idx_letter_forms_letter_period ON letter_forms(letter_id, period_id);
-    ''')
+    # 2. Schema Creation (Room-exact DDL; see scripts/room_schema.py)
+    create_content_schema(cur)
 
     # 3. Seed Periods
     period_data = [
