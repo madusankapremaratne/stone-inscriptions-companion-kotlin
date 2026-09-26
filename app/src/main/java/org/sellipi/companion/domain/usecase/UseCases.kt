@@ -1,10 +1,10 @@
 package org.sellipi.companion.domain.usecase
 
-import android.location.Location
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.sellipi.companion.domain.model.CaptureSession
+import org.sellipi.companion.domain.model.GeoPoint
 import org.sellipi.companion.domain.model.GlyphOccurrence
 import org.sellipi.companion.domain.model.Inscription
 import org.sellipi.companion.domain.model.Letter
@@ -18,18 +18,41 @@ import org.sellipi.companion.domain.repository.ResearcherCaptureRepository
 import org.sellipi.companion.domain.repository.SiteRepository
 
 class GetNearbySitesUseCase(private val siteRepo: SiteRepository) {
-    operator fun invoke(userLat: Double?, userLon: Double?): Flow<List<Site>> =
-        siteRepo.getSites().map { sites ->
-            if (userLat == null || userLon == null) {
+    /** Re-sorts whenever either the sites or the user's location change. */
+    operator fun invoke(userLocation: Flow<GeoPoint?>): Flow<List<Site>> =
+        combine(siteRepo.getSites(), userLocation) { sites, location ->
+            if (location == null) {
                 sites
             } else {
                 sites.map { site ->
-                    val results = FloatArray(1)
-                    Location.distanceBetween(userLat, userLon, site.latitude, site.longitude, results)
-                    site.copy(distanceFromUserM = results[0])
-                }.sortedBy { it.distanceFromUserM ?: Float.MAX_VALUE }
+                    site.copy(
+                        distanceFromUserM = haversineMeters(
+                            location.latitude, location.longitude, site.latitude, site.longitude
+                        ).toFloat()
+                    )
+                }.sortedBy { it.distanceFromUserM }
             }
         }
+}
+
+/**
+ * Nearest site first; within a site (or when distance is unknown) keeps the incoming
+ * chronological order. Stable, so inscriptions at unknown-distance sites go last.
+ */
+fun orderByProximity(inscriptions: List<Inscription>, sites: List<Site>): List<Inscription> {
+    val distanceBySite = sites.associate { it.id to it.distanceFromUserM }
+    if (distanceBySite.values.all { it == null }) return inscriptions
+    return inscriptions.sortedBy { distanceBySite[it.siteId] ?: Float.MAX_VALUE }
+}
+
+/** Great-circle distance; accurate to well under 1% at site scales, which is ample for ranking. */
+internal fun haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val earthRadiusM = 6_371_008.8
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLon = Math.toRadians(lon2 - lon1)
+    val a = Math.sin(dLat / 2).let { it * it } +
+        Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2).let { it * it }
+    return 2 * earthRadiusM * Math.asin(Math.sqrt(a).coerceAtMost(1.0))
 }
 
 class GetInscriptionDetailsUseCase(

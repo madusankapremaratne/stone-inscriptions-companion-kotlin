@@ -18,15 +18,23 @@ import org.sellipi.companion.ui.navigation.SellipiNavHost
 
 class MainActivity : ComponentActivity() {
 
+    // Observed by Home so location is fetched once the user grants it, not only at startup.
+    private var locationPermissionGranted by mutableStateOf(false)
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-        val fineLocGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        ) {
+            locationPermissionGranted = true
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        locationPermissionGranted = hasLocationPermission()
 
         // Request runtime permissions for Camera and GPS
         checkAndRequestPermissions()
@@ -42,11 +50,17 @@ class MainActivity : ComponentActivity() {
                     currentLanguage = currentLanguage,
                     onLanguageSelected = { currentLanguage = it },
                     isSunlightMode = isSunlightMode,
-                    onToggleSunlightMode = { isSunlightMode = !isSunlightMode }
+                    onToggleSunlightMode = { isSunlightMode = !isSunlightMode },
+                    locationPermissionGranted = locationPermissionGranted
                 )
             }
         }
     }
+
+    private fun hasLocationPermission(): Boolean =
+        listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION).any {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
 
     private fun checkAndRequestPermissions() {
         val permissions = mutableListOf<String>()
@@ -54,7 +68,9 @@ class MainActivity : ComponentActivity() {
             permissions.add(Manifest.permission.CAMERA)
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Android 12+ ignores a FINE request unless COARSE is requested with it.
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
         }
         if (permissions.isNotEmpty()) {
             permissionLauncher.launch(permissions.toTypedArray())

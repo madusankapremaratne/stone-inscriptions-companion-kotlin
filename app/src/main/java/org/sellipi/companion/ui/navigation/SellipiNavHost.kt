@@ -50,7 +50,8 @@ fun SellipiNavHost(
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
     isSunlightMode: Boolean,
-    onToggleSunlightMode: () -> Unit
+    onToggleSunlightMode: () -> Unit,
+    locationPermissionGranted: Boolean
 ) {
     val context = LocalContext.current
     val db = SellipiDatabase.getInstance(context)
@@ -85,6 +86,10 @@ fun SellipiNavHost(
                 factory = HomeViewModel.Factory(getNearbySitesUseCase, inscriptionRepo, sensorEngine, lessonRepo)
             )
             LaunchedEffect(Unit) { homeViewModel.onScreenShown() }
+            // Re-runs on grant and on every return to Home, so ordering follows the visitor between sites.
+            LaunchedEffect(locationPermissionGranted) {
+                if (locationPermissionGranted) homeViewModel.refreshLocation()
+            }
             HomeScreen(
                 viewModel = homeViewModel,
                 onNavigateToInscription = { id ->
