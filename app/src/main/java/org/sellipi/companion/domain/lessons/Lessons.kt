@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * Lessons are structured observations of where the app fell short (see docs/slm-lessons-architecture.md §5).
  * Everything in this package is plain Kotlin so it can be unit tested without Android.
  */
-enum class LessonType { ALIGNMENT_OUTCOME, ALIGNMENT_CORRECTION, IDENTIFICATION_RECOVERY }
+enum class LessonType { ALIGNMENT_OUTCOME, ALIGNMENT_CORRECTION, IDENTIFICATION_RECOVERY, KNOWLEDGE_GAP, ALIAS_MISS }
 
 /** observed = automatic telemetry, proposed = awaiting curator, verified = curator-approved. */
 enum class LessonTrust { OBSERVED, PROPOSED, VERIFIED }
@@ -69,11 +69,37 @@ data class IdentificationRecovery(
     val msToSelect: Long
 ) : LessonPayload
 
+/**
+ * A visitor question the knowledge pack could not answer. [queryNorm] is sanitised
+ * (normalised, no digits or emails, max 120 chars); it is the curator's to-do list.
+ */
+@Serializable
+@SerialName("knowledge_gap")
+data class KnowledgeGap(
+    val queryNorm: String,
+    val language: String,
+    val topScore: Double
+) : LessonPayload
+
+/**
+ * A missed question followed shortly by a rephrase that hit [hitCardId]: [missQueryNorm]
+ * is a candidate alias for that card, pending curator review.
+ */
+@Serializable
+@SerialName("alias_miss")
+data class AliasMiss(
+    val missQueryNorm: String,
+    val hitCardId: String,
+    val msBetween: Long
+) : LessonPayload
+
 val LessonPayload.type: LessonType
     get() = when (this) {
         is AlignmentOutcome -> LessonType.ALIGNMENT_OUTCOME
         is AlignmentCorrection -> LessonType.ALIGNMENT_CORRECTION
         is IdentificationRecovery -> LessonType.IDENTIFICATION_RECOVERY
+        is KnowledgeGap -> LessonType.KNOWLEDGE_GAP
+        is AliasMiss -> LessonType.ALIAS_MISS
     }
 
 data class Lesson(

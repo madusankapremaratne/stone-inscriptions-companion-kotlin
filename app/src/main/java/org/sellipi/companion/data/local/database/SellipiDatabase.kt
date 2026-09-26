@@ -6,14 +6,18 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import org.sellipi.companion.data.local.dao.CaptureDao
 import org.sellipi.companion.data.local.dao.InscriptionDao
+import org.sellipi.companion.data.local.dao.KnowledgeDao
 import org.sellipi.companion.data.local.dao.LetterDao
 import org.sellipi.companion.data.local.dao.LetterFormDao
 import org.sellipi.companion.data.local.dao.PeriodDao
 import org.sellipi.companion.data.local.dao.SiteDao
 import org.sellipi.companion.data.local.dao.TranscriptionDao
 import org.sellipi.companion.data.local.entity.CaptureSessionEntity
+import org.sellipi.companion.data.local.entity.CardLinkEntity
+import org.sellipi.companion.data.local.entity.EntityAliasEntity
 import org.sellipi.companion.data.local.entity.GlyphOccurrenceEntity
 import org.sellipi.companion.data.local.entity.InscriptionEntity
+import org.sellipi.companion.data.local.entity.KnowledgeCardEntity
 import org.sellipi.companion.data.local.entity.LetterEntity
 import org.sellipi.companion.data.local.entity.LetterFormEntity
 import org.sellipi.companion.data.local.entity.PeriodEntity
@@ -29,10 +33,14 @@ import org.sellipi.companion.data.local.entity.TranscriptionLineEntity
         InscriptionEntity::class,
         TranscriptionLineEntity::class,
         GlyphOccurrenceEntity::class,
-        CaptureSessionEntity::class
+        CaptureSessionEntity::class,
+        KnowledgeCardEntity::class,
+        EntityAliasEntity::class,
+        CardLinkEntity::class
     ],
     version = SellipiDatabase.CONTENT_VERSION,
-    exportSchema = false
+    // Exported so scripts/check_room_schema.py can verify the prepackaged asset matches.
+    exportSchema = true
 )
 abstract class SellipiDatabase : RoomDatabase() {
     abstract fun siteDao(): SiteDao
@@ -42,10 +50,11 @@ abstract class SellipiDatabase : RoomDatabase() {
     abstract fun letterFormDao(): LetterFormDao
     abstract fun transcriptionDao(): TranscriptionDao
     abstract fun captureDao(): CaptureDao
+    abstract fun knowledgeDao(): KnowledgeDao
 
     companion object {
         /** Content pack version; stamped on every lesson so lessons can be attributed to a release. */
-        const val CONTENT_VERSION = 1
+        const val CONTENT_VERSION = 2
 
         @Volatile
         private var INSTANCE: SellipiDatabase? = null

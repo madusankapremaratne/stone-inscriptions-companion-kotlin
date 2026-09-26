@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import org.sellipi.companion.data.lessons.appVersionOf
 import org.sellipi.companion.data.local.database.SellipiDatabase
 import org.sellipi.companion.data.repository.EvolutionRepositoryImpl
 import org.sellipi.companion.data.repository.InscriptionRepositoryImpl
+import org.sellipi.companion.data.repository.KnowledgeRepositoryImpl
 import org.sellipi.companion.data.repository.ResearcherCaptureRepositoryImpl
 import org.sellipi.companion.data.repository.SiteRepositoryImpl
 import org.sellipi.companion.domain.lessons.ExportLessonsUseCase
@@ -32,6 +34,8 @@ import org.sellipi.companion.domain.usecase.SaveResearcherCaptureUseCase
 import org.sellipi.companion.engine.ar.ArCoreSessionManager
 import org.sellipi.companion.engine.sensor.SensorFusionEngine
 import org.sellipi.companion.ui.ar.ArViewModel
+import org.sellipi.companion.ui.ask.AskScreen
+import org.sellipi.companion.ui.ask.AskViewModel
 import org.sellipi.companion.ui.ar.ArViewScreen
 import org.sellipi.companion.ui.evolution.LetterEvolutionScreen
 import org.sellipi.companion.ui.evolution.LetterEvolutionViewModel
@@ -70,6 +74,9 @@ fun SellipiNavHost(
     val saveResearcherCaptureUseCase = SaveResearcherCaptureUseCase(captureRepo)
 
     val lessonRepo = remember { LessonRepositoryImpl.getInstance(context, SellipiDatabase.CONTENT_VERSION) }
+    val knowledgeRepo = remember { KnowledgeRepositoryImpl(db) }
+    // Draft (unreviewed) cards are visible only in debuggable builds, for curator review.
+    val showDraftKnowledge = remember { (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 }
     val exportLessonsUseCase = remember {
         ExportLessonsUseCase(lessonRepo, FileLessonExportSink(context), appVersionOf(context))
     }
@@ -98,6 +105,7 @@ fun SellipiNavHost(
                 },
                 onNavigateToEvolution = { navController.navigate(Screen.LetterEvolution.createRoute("L01")) },
                 onNavigateToResearcher = { navController.navigate(Screen.ResearcherCapture.createRoute("INSC_ACTIVE")) },
+                onNavigateToAsk = { navController.navigate(Screen.Ask.createRoute()) },
                 currentLanguage = currentLanguage,
                 onLanguageSelected = onLanguageSelected,
                 isSunlightMode = isSunlightMode,
@@ -120,6 +128,7 @@ fun SellipiNavHost(
                 onLaunchOverlay = { id -> navController.navigate(Screen.OverlayMode.createRoute(id)) },
                 onLaunchAr = { id -> navController.navigate(Screen.ArMode.createRoute(id)) },
                 onNavigateToLetter = { letterId -> navController.navigate(Screen.LetterEvolution.createRoute(letterId)) },
+                onAskAboutInscription = { id -> navController.navigate(Screen.Ask.createRoute(id)) },
                 currentLanguage = currentLanguage,
                 onLanguageSelected = onLanguageSelected,
                 isSunlightMode = isSunlightMode,
@@ -184,7 +193,26 @@ fun SellipiNavHost(
             )
         }
 
-        // 6. Researcher Field Capture Screen
+        // 6. Ask: curated knowledge Q&A (extractive, no generation)
+        composable(
+            route = Screen.Ask.route,
+            arguments = listOf(navArgument("inscriptionId") { type = NavType.StringType; nullable = true; defaultValue = null })
+        ) { backStackEntry ->
+            val inscriptionId = backStackEntry.arguments?.getString("inscriptionId")
+            val askViewModel: AskViewModel = viewModel(
+                factory = AskViewModel.Factory(inscriptionId, knowledgeRepo, inscriptionRepo, lessonRepo, showDraftKnowledge)
+            )
+            AskScreen(
+                viewModel = askViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                currentLanguage = currentLanguage,
+                onLanguageSelected = onLanguageSelected,
+                isSunlightMode = isSunlightMode,
+                onToggleSunlightMode = onToggleSunlightMode
+            )
+        }
+
+        // 7. Researcher Field Capture Screen
         composable(
             route = Screen.ResearcherCapture.route,
             arguments = listOf(navArgument("inscriptionId") { type = NavType.StringType; defaultValue = "INSC_ACTIVE" })

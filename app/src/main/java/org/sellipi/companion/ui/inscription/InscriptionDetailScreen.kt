@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.ViewInAr
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -61,6 +62,7 @@ fun InscriptionDetailScreen(
     onLaunchOverlay: (String) -> Unit,
     onLaunchAr: (String) -> Unit,
     onNavigateToLetter: (String) -> Unit,
+    onAskAboutInscription: (String) -> Unit,
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
     isSunlightMode: Boolean,
@@ -229,6 +231,18 @@ fun InscriptionDetailScreen(
                             Text("Start ARCore Surface Tracking", color = GoldPatina)
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = { onAskAboutInscription(insc.id) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Icon(Icons.Default.QuestionAnswer, contentDescription = null, tint = GoldPatina)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.ask_about_inscription), color = GoldPatina)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

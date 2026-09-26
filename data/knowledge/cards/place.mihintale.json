@@ -1,0 +1,33 @@
+{
+  "id": "place.mihintale",
+  "kind": "place",
+  "status": "draft",
+  "title": {
+    "en": "Mihintale",
+    "si": "මිහින්තලේ",
+    "ta": "மிகிந்தலை"
+  },
+  "body": {
+    "en": "Mihintale is a hill complex about 12 km east of Anuradhapura, revered as the place where Buddhism was introduced to Sri Lanka. It holds early rock shelters with Brahmi donation inscriptions and later monastic buildings, including the 10th-century slab inscriptions of King Mahinda IV, which set out rules for running the monastery.",
+    "si": null,
+    "ta": null
+  },
+  "aliases": [
+    { "text": "Mihintale", "lang": "en" },
+    { "text": "Mihintalaya", "lang": "roman" },
+    { "text": "Missaka Pabbata", "lang": "roman" },
+    { "text": "මිහින්තලේ", "lang": "si" },
+    { "text": "මිහින්තලය", "lang": "si" },
+    { "text": "மிகிந்தலை", "lang": "ta" },
+    { "text": "மிஹிந்தலை", "lang": "ta" }
+  ],
+  "links": {
+    "sites": ["SITE_MIHINTALE"],
+    "inscriptions": ["INSC_MIH_01"]
+  },
+  "sources": [
+    "Epigraphia Zeylanica, Vol. I (Mihintale tablets of Mahinda IV)",
+    "Mahavamsa, ch. XIV, trans. W. Geiger (1912)"
+  ],
+  "confidence_note": null
+}

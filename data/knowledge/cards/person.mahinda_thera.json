@@ -1,0 +1,33 @@
+{
+  "id": "person.mahinda_thera",
+  "kind": "person",
+  "status": "draft",
+  "title": {
+    "en": "Mahinda Thera",
+    "si": "මිහිඳු මහ රහතන් වහන්සේ",
+    "ta": "மகிந்த தேரர்"
+  },
+  "body": {
+    "en": "Mahinda (Sinhala: Mihindu) is remembered in the chronicles as the Buddhist monk who brought Theravada Buddhism to Sri Lanka in the 3rd century BCE. The Mahavamsa describes him as a son of the Mauryan emperor Ashoka and places his first meeting with King Devanampiya Tissa on the hill of Mihintale, whose name is traditionally linked to him.",
+    "si": null,
+    "ta": null
+  },
+  "aliases": [
+    { "text": "Mahinda Thera", "lang": "en" },
+    { "text": "Arahat Mahinda", "lang": "en" },
+    { "text": "Mihindu", "lang": "roman" },
+    { "text": "මිහිඳු මහ රහතන් වහන්සේ", "lang": "si" },
+    { "text": "මිහිඳු", "lang": "si" },
+    { "text": "மகிந்த தேரர்", "lang": "ta" },
+    { "text": "Mahinda", "lang": "en", "ambiguous": true }
+  ],
+  "links": {
+    "sites": ["SITE_MIHINTALE"],
+    "inscriptions": []
+  },
+  "sources": [
+    "Mahavamsa, chs. XIII-XX, trans. W. Geiger (1912)",
+    "Dipavamsa, trans. H. Oldenberg (1879)"
+  ],
+  "confidence_note": "Details of Mahinda's life come mainly from chronicles written several centuries later. 'Mahinda' alone is ambiguous: several later kings, including Mahinda IV of the Mihintale tablets, bore the name."
+}

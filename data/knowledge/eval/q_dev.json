@@ -1,0 +1,195 @@
+{
+  "description": "Development question set for tuning retrieval (docs/slm-lessons-architecture.md §7). Seed only: expand to ~100 and never tune against q_test.",
+  "questions": [
+    {
+      "q": "Who is Dewanam Piyathissa",
+      "lang": "EN",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "Who was Devanampiya Tissa?",
+      "lang": "EN",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "Tell me about King Devanampiyatissa",
+      "lang": "EN",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "devanapiya tisa",
+      "lang": "EN",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "Who was Devānampiya Tissa",
+      "lang": "EN",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "දේවානම්පියතිස්ස රජු කවුද?",
+      "lang": "SI",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "දේවානම් පියතිස්ස",
+      "lang": "SI",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "தேவநம்பிய தீசன் யார்?",
+      "lang": "TA",
+      "expect": [
+        "person.devanampiya_tissa"
+      ]
+    },
+    {
+      "q": "Who was Mahinda Thera?",
+      "lang": "EN",
+      "expect": [
+        "person.mahinda_thera"
+      ]
+    },
+    {
+      "q": "Who brought Buddhism, Arahat Mahinda?",
+      "lang": "EN",
+      "expect": [
+        "person.mahinda_thera"
+      ]
+    },
+    {
+      "q": "මිහිඳු මහ රහතන් වහන්සේ ගැන",
+      "lang": "SI",
+      "expect": [
+        "person.mahinda_thera"
+      ]
+    },
+    {
+      "q": "What is Mihintale?",
+      "lang": "EN",
+      "expect": [
+        "place.mihintale"
+      ]
+    },
+    {
+      "q": "මිහින්තලේ ගැන කියන්න",
+      "lang": "SI",
+      "expect": [
+        "place.mihintale"
+      ]
+    },
+    {
+      "q": "மிஹிந்தலை பற்றி சொல்லுங்கள்",
+      "lang": "TA",
+      "expect": [
+        "place.mihintale"
+      ]
+    },
+    {
+      "q": "What is Brahmi script?",
+      "lang": "EN",
+      "expect": [
+        "term.early_brahmi"
+      ]
+    },
+    {
+      "q": "බ්‍රාහ්මී අක්ෂර මොනවාද?",
+      "lang": "SI",
+      "expect": [
+        "term.early_brahmi"
+      ]
+    },
+    {
+      "q": "What does lene mean?",
+      "lang": "EN",
+      "expect": [
+        "term.lena"
+      ]
+    },
+    {
+      "q": "Why is there a drip-ledge above the cave?",
+      "lang": "EN",
+      "expect": [
+        "term.lena"
+      ]
+    },
+    {
+      "q": "Who brought Buddhism to Sri Lanka?",
+      "lang": "EN",
+      "expect": [
+        "person.mahinda_thera"
+      ],
+      "note": "no name in question: keyword path only"
+    },
+    {
+      "q": "Where was Buddhism introduced to Sri Lanka?",
+      "lang": "EN",
+      "expect": [
+        "place.mihintale"
+      ],
+      "note": "no name in question: keyword path only"
+    },
+    {
+      "q": "Who was Mahinda IV?",
+      "lang": "EN",
+      "expect": [],
+      "note": "ambiguous name trap: must not return Mahinda Thera"
+    },
+    {
+      "q": "Who was Mahinda?",
+      "lang": "EN",
+      "expect": [],
+      "note": "genuinely ambiguous; abstain"
+    },
+    {
+      "q": "Which king was called Tissa?",
+      "lang": "EN",
+      "expect": [],
+      "note": "many kings named Tissa"
+    },
+    {
+      "q": "Who built Sigiriya?",
+      "lang": "EN",
+      "expect": []
+    },
+    {
+      "q": "Who was King Dutugemunu?",
+      "lang": "EN",
+      "expect": []
+    },
+    {
+      "q": "When was Polonnaruwa the capital?",
+      "lang": "EN",
+      "expect": []
+    },
+    {
+      "q": "What is the entrance fee?",
+      "lang": "EN",
+      "expect": []
+    },
+    {
+      "q": "Where can I buy food near here?",
+      "lang": "EN",
+      "expect": []
+    },
+    {
+      "q": "සීගිරිය හැදුවේ කවුද?",
+      "lang": "SI",
+      "expect": []
+    }
+  ]
+}

@@ -404,3 +404,6 @@ def build_database():
 
 if __name__ == '__main__':
     build_database()
+    # A full rebuild drops the knowledge tables; re-add them from data/knowledge/cards.
+    from build_knowledge_pack import build_knowledge_pack
+    build_knowledge_pack()

@@ -33,7 +33,7 @@ Sellipi deliberately does **not** recognise glyphs; it identifies the inscriptio
 
 ```
                  ┌────────────────────── Device (offline runtime) ──────────────────────┐
- Visitor ──Q──▶  │ Normalise ─▶ Alias lookup ─▶ FTS5 over Knowledge Cards               │
+ Visitor ──Q──▶  │ Normalise ─▶ Alias lookup ─▶ In-memory retrieval over cards          │
                  │                                   │                                  │
                  │                  strong hit ◀─────┴─────▶ weak / no hit              │
                  │                      │                         │                     │
@@ -62,7 +62,7 @@ Sellipi deliberately does **not** recognise glyphs; it identifies the inscriptio
 |---|---|---|---|
 | 0 | Deterministic context | Current inscription/site → pinned cards | Always runs; cards linked to the visible inscription are boosted |
 | 1 | Alias normaliser | Raw query → canonical entity IDs | Case/diacritic/whitespace folding; si/ta/en + romanisation variants |
-| 2 | FTS5 retrieval | Query + entity IDs → top-k cards with BM25 score | Score ≥ `T_strong` → Tier 3; else Tier 4 |
+| 2 | Retrieval (in-memory) | Query + entity IDs → top-k cards with alias + keyword score | Score ≥ `T_strong` → Tier 3; else Tier 4 |
 | 3 | Gemma (grounded rephrase) | Top-k cards → English answer with `[card:ID]` citations | Post-check: ≥1 citation, all cited IDs ∈ retrieved set |
 | 4 | Abstain | — | Show "Not in our records yet" + log `KnowledgeGap` |
 
@@ -115,7 +115,8 @@ ENTITY_ALIAS
 CARD_LINK
   card_id FK, inscription_id FK | site_id FK   -- powers Tier 0 boosting
 
-KNOWLEDGE_CARD_FTS       -- FTS5 virtual table over titles + bodies + aliases
+-- No FTS table: retrieval is in-memory (see §8.2). FTS5 is not reliably available in Android's
+-- framework SQLite, and FTS4's tokenizers are untested on Sinhala/Tamil combining vowel signs.
 ```
 
 ### 5.2 Lessons DB (separate Room DB — `sellipi_lessons.db`)
@@ -227,7 +228,7 @@ curation_log    (curator-only: lesson_id, decision, pack_version, note)
 | Phase | Deliverable | Exit criteria |
 |---|---|---|
 | **P0 — Instrument** | Lessons DB, `AlignmentOutcome`, `AlignmentCorrection`, `IdentificationRecovery` capture; local export | Lessons recorded in a field test; no UI regression |
-| **P1 — Knowledge pack** | `KNOWLEDGE_CARD`, `ENTITY_ALIAS`, `CARD_LINK`, FTS5; ~50 seed cards; extractive Q&A (no SLM) | Q&A works on all devices; Q-dev built |
+| **P1 — Knowledge pack** | `KNOWLEDGE_CARD`, `ENTITY_ALIAS`, `CARD_LINK`, in-memory retriever; ~50 seed cards; extractive Q&A (no SLM) | Q&A works on all devices; Q-dev built |
 | **P2 — Grounded SLM** | Gemma 3 1B on-demand delivery, capability gate, cascade, citation post-check | Hallucination rate on Q-dev within target; thermal fallback verified |
 | **P3 — Sync & curation** | Supabase tables + RLS, WorkManager sync, consent UI, pack registry, `build_database.py` merge | End-to-end: lesson → verified → pack vN+1 on device |
 | **P4 — Local adaptation** | Default-mode selection, seeded quads, local aliases | Measurable time-to-align improvement on repeat sessions |
@@ -266,3 +267,26 @@ curation_log    (curator-only: lesson_id, decision, pack_version, note)
 | D2 | Source hierarchy for cards (Paranavitana, *Epigraphia Zeylanica*, Department of Archaeology, *Mahavamsa*) | Inscriptional evidence ranks above chronicle; chronicle-only claims carry `confidence_note` |
 | D3 | Seed card list (~50) | Entities named in pilot-site transcriptions first |
 | D4 | `T_strong` / `k` values | Tuned on Q-dev in P2 |
+
+### 8.2 Phase 1 — Implementation Notes
+
+| Component | Location |
+|---|---|
+| Card sources (curator-edited JSON) + guide | `data/knowledge/cards/`, `data/knowledge/README.md` |
+| Validation + write into content DB | `scripts/build_knowledge_pack.py` (incremental; also run by `build_database.py`) |
+| Normaliser, retriever, ask use case (pure Kotlin) | `domain/knowledge/` |
+| Room entities / DAO / repository | `data/local/entity/KnowledgeEntities.kt`, `KnowledgeDao.kt`, `KnowledgeRepositoryImpl.kt` |
+| Ask screen (Home + inscription detail entry points) | `ui/ask/` |
+| Retrieval evaluation over real cards + Q-dev | `KnowledgeEvalTest` (gate: zero wrong answers, answer rate ≥ 0.85) |
+| Prepackaged-DB vs Room schema check | `scripts/check_room_schema.py` |
+
+**Retrieval design.** In-memory rather than FTS: a few hundred cards score in microseconds, and the same Kotlin code runs in the evaluation test, so reported numbers describe the shipped retriever. Names are matched on a spacing- and romanisation-folded key (`Dewanam Piyathissa` = `Devanampiya Tissa`); Sinhala/Tamil keep their vowel signs, and joiners (ZWJ/ZWNJ) are ignored. Words consumed by an alias do not count again as keywords, so an ambiguous name alone ("Mahinda", "Tissa") abstains.
+
+**New lessons.** `KNOWLEDGE_GAP` (sanitised query, language, top score) and `ALIAS_MISS` (a miss followed within 60 s by a hit: the missed wording is a candidate alias).
+
+**Draft gating.** `status: draft` cards appear only in debuggable builds, with a DRAFT badge. Release builds show `verified` only; with no verified cards, Ask says no curated answers are available.
+
+**Known limits (Q-dev seed, 29 questions).** Grounded answer rate 0.90, abstention precision 0.82, zero wrong answers. The two failures are name-free questions ("Who brought Buddhism to Sri Lanka?"), which abstain because keyword overlap alone rarely clears the threshold. These numbers are circular: the same author wrote the cards and the questions. Real visitor questions are the first thing Q-dev needs.
+
+**Prepackaged database compatibility.** The asset DB keeps `PRAGMA user_version = 0` on purpose, so that on first open Room runs its `CREATE ... IF NOT EXISTS` statements (creating its own indices) before validating. The knowledge tables are written in Room's exact generated form. The **original** tables from `build_database.py` appear not to match Room's expectations (nullable `TEXT PRIMARY KEY`, hand-named `idx_*` indices). If Room validates them strictly, the app fails at first launch. This predates the lessons work and is unverified here. After the first Gradle build, run `python3 scripts/check_room_schema.py` to confirm either way.
+

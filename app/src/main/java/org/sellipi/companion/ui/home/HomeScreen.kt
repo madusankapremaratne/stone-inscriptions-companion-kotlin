@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.ViewInAr
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +37,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -75,6 +77,7 @@ fun HomeScreen(
     onNavigateToInscription: (String) -> Unit,
     onNavigateToEvolution: () -> Unit,
     onNavigateToResearcher: () -> Unit,
+    onNavigateToAsk: () -> Unit,
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
     isSunlightMode: Boolean,
@@ -105,7 +108,8 @@ fun HomeScreen(
             item {
                 HeroBanner(
                     onNavigateToEvolution = onNavigateToEvolution,
-                    onNavigateToResearcher = onNavigateToResearcher
+                    onNavigateToResearcher = onNavigateToResearcher,
+                    onNavigateToAsk = onNavigateToAsk
                 )
             }
 
@@ -201,7 +205,8 @@ fun HomeScreen(
 @Composable
 fun HeroBanner(
     onNavigateToEvolution: () -> Unit,
-    onNavigateToResearcher: () -> Unit
+    onNavigateToResearcher: () -> Unit,
+    onNavigateToAsk: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -266,6 +271,16 @@ fun HeroBanner(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(stringResource(R.string.nav_researcher), fontSize = 13.sp)
                     }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = onNavigateToAsk,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Icon(Icons.Default.QuestionAnswer, contentDescription = null, modifier = Modifier.size(18.dp), tint = GoldPatina)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringResource(R.string.nav_ask), fontSize = 13.sp, color = GoldPatina)
                 }
             }
         }

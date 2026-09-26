@@ -68,4 +68,16 @@
     <string name="export_lessons">උගත් පාඩම් ලොගය අපනයනය කරන්න (%1$d)</string>
     <string name="export_lessons_success">පාඩම් ලොගය සුරකින ලදී: %1$s</string>
     <string name="export_lessons_failed">පාඩම් ලොගය අපනයනය අසාර්ථක විය</string>
+    <string name="nav_ask">ප්‍රශ්නයක් අසන්න</string>
+    <string name="ask_title">සෙල්ලිපියෙන් අසන්න</string>
+    <string name="ask_hint">උදා: දේවානම්පියතිස්ස රජු කවුද?</string>
+    <string name="ask_submit">අසන්න</string>
+    <string name="ask_intro">මෙම සෙල්ලිපි පිටුපස සිටින පුද්ගලයින්, ස්ථාන සහ පද ගැන අසන්න. පිළිතුරු ලැබෙන්නේ සත්‍යාපිත, මූලාශ්‍ර සහිත වාර්තාවලින් පමණි.</string>
+    <string name="ask_not_in_records">මෙය තවම අපගේ වාර්තාවල නැත. මෙවැනි ප්‍රශ්න ඊළඟට එකතු කළ යුතු දේ තීරණය කිරීමට උපකාරී වේ.</string>
+    <string name="ask_pack_empty">මෙම අනුවාදයේ තවම සත්‍යාපිත පිළිතුරු නොමැත.</string>
+    <string name="ask_draft_badge">කෙටුම්පත</string>
+    <string name="ask_translation_pending">පරිවර්තනය බලාපොරොත්තුවෙන්: ඉංග්‍රීසියෙන් පෙන්වයි</string>
+    <string name="ask_confidence_note">සටහන: %1$s</string>
+    <string name="ask_sources">මූලාශ්‍ර</string>
+    <string name="ask_about_inscription">මෙම සෙල්ලිපිය ගැන අසන්න</string>
 </resources>

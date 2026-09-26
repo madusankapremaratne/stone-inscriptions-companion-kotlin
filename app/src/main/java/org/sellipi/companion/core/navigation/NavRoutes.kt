@@ -19,6 +19,12 @@ sealed class Screen(val route: String) {
         fun createRoute(letterId: String = "L01") = "evolution/$letterId"
     }
 
+    /** Optional inscription context boosts cards linked to what the visitor is standing at. */
+    data object Ask : Screen("ask?inscriptionId={inscriptionId}") {
+        fun createRoute(inscriptionId: String? = null) =
+            if (inscriptionId == null) "ask" else "ask?inscriptionId=$inscriptionId"
+    }
+
     data object ResearcherCapture : Screen("researcher/{inscriptionId}") {
         fun createRoute(inscriptionId: String) = "researcher/$inscriptionId"
     }

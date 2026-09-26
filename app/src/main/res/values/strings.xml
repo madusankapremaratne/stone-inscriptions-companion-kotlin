@@ -68,4 +68,16 @@
     <string name="export_lessons">Export Lessons Log (%1$d)</string>
     <string name="export_lessons_success">Lessons log saved: %1$s</string>
     <string name="export_lessons_failed">Lessons export failed</string>
+    <string name="nav_ask">Ask a Question</string>
+    <string name="ask_title">Ask Sellipi</string>
+    <string name="ask_hint">e.g. Who was Devanampiya Tissa?</string>
+    <string name="ask_submit">Ask</string>
+    <string name="ask_intro">Ask about the people, places and terms behind these inscriptions. Answers come only from curated, cited records.</string>
+    <string name="ask_not_in_records">Not in our records yet. Questions like this help us decide what to add next.</string>
+    <string name="ask_pack_empty">No curated answers are available in this version yet.</string>
+    <string name="ask_draft_badge">DRAFT</string>
+    <string name="ask_translation_pending">Translation pending: showing English</string>
+    <string name="ask_confidence_note">Note: %1$s</string>
+    <string name="ask_sources">Sources</string>
+    <string name="ask_about_inscription">Ask About This Inscription</string>
 </resources>

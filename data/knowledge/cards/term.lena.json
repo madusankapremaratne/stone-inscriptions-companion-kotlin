@@ -1,0 +1,32 @@
+{
+  "id": "term.lena",
+  "kind": "term",
+  "status": "draft",
+  "title": {
+    "en": "Lena (cave)",
+    "si": "ලෙන",
+    "ta": "குகை"
+  },
+  "body": {
+    "en": "Lena (Early Brahmi: lene) means 'cave'. Many early inscriptions follow a formula naming the donor and the cave and giving it to the Sangha, often 'of the four quarters, present and absent' (agata anagata catudisa sagasa). A drip-ledge was cut above the entrance to keep rainwater out, and the inscription was usually carved just below it.",
+    "si": null,
+    "ta": null
+  },
+  "aliases": [
+    { "text": "Lena (cave)", "lang": "en" },
+    { "text": "Lena", "lang": "roman" },
+    { "text": "Lene", "lang": "roman" },
+    { "text": "drip-ledge", "lang": "en" },
+    { "text": "ලෙන", "lang": "si" },
+    { "text": "ලෙණෙ", "lang": "si" },
+    { "text": "குகை", "lang": "ta" }
+  ],
+  "links": {
+    "sites": [],
+    "inscriptions": ["INSC_ANP_01", "INSC_RIT_01"]
+  },
+  "sources": [
+    "S. Paranavitana, Inscriptions of Ceylon, Vol. I (1970)"
+  ],
+  "confidence_note": null
+}

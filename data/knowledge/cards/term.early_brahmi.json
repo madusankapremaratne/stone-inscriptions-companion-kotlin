@@ -1,0 +1,33 @@
+{
+  "id": "term.early_brahmi",
+  "kind": "term",
+  "status": "draft",
+  "title": {
+    "en": "Early Brahmi script",
+    "si": "මුල් බ්‍රාහ්මී අක්ෂර",
+    "ta": "ஆரம்பகால பிராமி எழுத்து"
+  },
+  "body": {
+    "en": "Early Brahmi is the script of Sri Lanka's oldest inscriptions, carved from about the 3rd century BCE. Most are short records cut below the drip-ledges of rock shelters, dedicating the caves to the Buddhist Sangha. The modern Sinhala script developed from it; the letter-evolution view in this app shows how individual letters changed over the centuries.",
+    "si": null,
+    "ta": null
+  },
+  "aliases": [
+    { "text": "Early Brahmi script", "lang": "en" },
+    { "text": "Early Brahmi", "lang": "en" },
+    { "text": "Brahmi", "lang": "en" },
+    { "text": "Brahmi script", "lang": "en" },
+    { "text": "මුල් බ්‍රාහ්මී අක්ෂර", "lang": "si" },
+    { "text": "බ්‍රාහ්මී", "lang": "si" },
+    { "text": "ஆரம்பகால பிராமி எழுத்து", "lang": "ta" },
+    { "text": "பிராமி", "lang": "ta" }
+  ],
+  "links": {
+    "sites": [],
+    "inscriptions": ["INSC_ANP_01", "INSC_RIT_01"]
+  },
+  "sources": [
+    "S. Paranavitana, Inscriptions of Ceylon, Vol. I (1970)"
+  ],
+  "confidence_note": "The dating of the earliest inscriptions rests on palaeographic comparison and is debated."
+}

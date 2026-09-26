@@ -1,0 +1,36 @@
+{
+  "id": "person.devanampiya_tissa",
+  "kind": "person",
+  "status": "draft",
+  "title": {
+    "en": "Devanampiya Tissa",
+    "si": "දේවානම්පියතිස්ස රජු",
+    "ta": "தேவநம்பிய தீசன்"
+  },
+  "body": {
+    "en": "Devanampiya Tissa was a king of Anuradhapura in the 3rd century BCE. The Pali chronicles (Dipavamsa and Mahavamsa) record that the monk Mahinda, sent from the court of the Mauryan emperor Ashoka, met the king at Mihintale, after which Buddhism became established in the island. 'Devanampiya' (Early Brahmi: devanapiya), meaning 'beloved of the gods', is a royal title also used by Ashoka, and it appears in some of Sri Lanka's earliest cave inscriptions.",
+    "si": null,
+    "ta": null
+  },
+  "aliases": [
+    { "text": "Devanampiya Tissa", "lang": "en" },
+    { "text": "Devanampiyatissa", "lang": "en" },
+    { "text": "Devanampiya Tisa", "lang": "en" },
+    { "text": "Dewanam Piyathissa", "lang": "en" },
+    { "text": "Devanapiya Tisa", "lang": "roman" },
+    { "text": "දේවානම්පියතිස්ස රජු", "lang": "si" },
+    { "text": "දේවානම්පියතිස්ස", "lang": "si" },
+    { "text": "தேவநம்பிய தீசன்", "lang": "ta" },
+    { "text": "Tissa", "lang": "en", "ambiguous": true },
+    { "text": "තිස්ස", "lang": "si", "ambiguous": true }
+  ],
+  "links": {
+    "sites": ["SITE_MIHINTALE", "SITE_ANURADHAPURA"],
+    "inscriptions": ["INSC_ANP_01"]
+  },
+  "sources": [
+    "Mahavamsa, chs. XI-XX, trans. W. Geiger (1912)",
+    "S. Paranavitana, Inscriptions of Ceylon, Vol. I (1970)"
+  ],
+  "confidence_note": "Reign dates follow the chronicle-based chronology (c. 247-207 BCE) and are debated. Which 'devanapiya' inscriptions refer to this king rather than to later rulers who used the same title is contested."
+}
