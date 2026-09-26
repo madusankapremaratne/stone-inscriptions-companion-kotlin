@@ -252,7 +252,7 @@ curation_log    (curator-only: lesson_id, decision, pack_version, note)
 - `glyphTapMisses` counts every tap that hits no bounding box, including taps used to dismiss the glyph sheet. Treat it as a noisy proxy for "letters the visitor could not reach".
 - AR success is currently always `false`: `ArCoreSessionManager.onArFrameUpdated` is not yet driven by a frame loop. The lessons will record that honestly until AR tracking is wired.
 - Every Home pick is logged as `IdentificationRecovery`, because no automatic identification exists yet. Once AR/geofence auto-ID ships, add an `attemptedMethod` field (payload schema v2).
-- The Home inscription list is ordered by date (`date_range_start`), not proximity, and `GetNearbySitesUseCase` is invoked once with null coordinates, so location never reorders it. `rankInList` therefore measures position in a chronological list today; re-baseline this metric once proximity ranking lands.
+- `rankInList` is position in a proximity-ordered list (nearest site first, chronological within a site) when `locationAvailable = true`, and in the chronological list otherwise. Always split analyses on `locationAvailable`.
 - Lessons are stored with `trust = OBSERVED`, `synced_at = null`; sync arrives in P3.
 - Room exports the lessons schema to `app/schemas/`. Commit it after the first build; it is the baseline for future migration tests.
 

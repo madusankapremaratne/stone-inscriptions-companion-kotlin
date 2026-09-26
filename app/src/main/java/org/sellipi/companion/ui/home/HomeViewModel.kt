@@ -12,10 +12,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.sellipi.companion.domain.lessons.LessonRepository
 import org.sellipi.companion.domain.lessons.identificationRecoveryOf
+import org.sellipi.companion.domain.model.GeoPoint
 import org.sellipi.companion.domain.model.Inscription
 import org.sellipi.companion.domain.model.Site
 import org.sellipi.companion.domain.repository.InscriptionRepository
 import org.sellipi.companion.domain.usecase.GetNearbySitesUseCase
+import org.sellipi.companion.domain.usecase.orderByProximity
 import org.sellipi.companion.engine.sensor.SensorFusionEngine
 
 data class HomeUiState(
@@ -37,16 +39,15 @@ class HomeViewModel(
 
     private val _searchQuery = MutableStateFlow("")
     private val _selectedSiteId = MutableStateFlow<String?>(null)
-    private val _userLat = MutableStateFlow<Double?>(null)
-    private val _userLon = MutableStateFlow<Double?>(null)
+    private val _userLocation = MutableStateFlow<GeoPoint?>(null)
 
     val uiState: StateFlow<HomeUiState> = combine(
-        getNearbySitesUseCase(_userLat.value, _userLon.value),
+        getNearbySitesUseCase(_userLocation),
         inscriptionRepo.getAllInscriptions(),
         _searchQuery,
         _selectedSiteId
     ) { sites, inscriptions, query, siteId ->
-        val filteredInscriptions = if (query.isBlank()) {
+        val filtered = if (query.isBlank()) {
             if (siteId == null) inscriptions else inscriptions.filter { it.siteId == siteId }
         } else {
             inscriptions.filter {
@@ -58,23 +59,18 @@ class HomeViewModel(
 
         HomeUiState(
             sites = sites,
-            allInscriptions = filteredInscriptions,
+            allInscriptions = orderByProximity(filtered, sites),
             searchQuery = query,
             selectedSiteId = siteId,
             isLoading = false
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState(isLoading = true))
 
-    init {
-        refreshLocation()
-    }
-
     fun refreshLocation() {
         viewModelScope.launch {
             val loc = sensorEngine.getCurrentLocation()
             if (loc != null) {
-                _userLat.value = loc.latitude
-                _userLon.value = loc.longitude
+                _userLocation.value = GeoPoint(loc.latitude, loc.longitude)
             }
         }
     }
@@ -99,7 +95,7 @@ class HomeViewModel(
             visibleIds = uiState.value.allInscriptions.map { it.id },
             searchQuery = _searchQuery.value,
             selectedSiteId = _selectedSiteId.value,
-            locationAvailable = _userLat.value != null,
+            locationAvailable = _userLocation.value != null,
             msToSelect = System.currentTimeMillis() - shownAt
         )
         lessonRepo.record(lesson, inscriptionId)

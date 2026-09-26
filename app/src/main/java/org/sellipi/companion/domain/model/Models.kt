@@ -101,6 +101,8 @@ data class CaptureSession(
     val permitReference: String
 )
 
+data class GeoPoint(val latitude: Double, val longitude: Double)
+
 data class QuadPoint(val x: Float, val y: Float)
 
 data class InscriptionQuad(
