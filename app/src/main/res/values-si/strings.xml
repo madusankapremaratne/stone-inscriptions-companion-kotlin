@@ -65,4 +65,7 @@
     <string name="telemetry_gps">GPS ඛණ්ඩාංක</string>
     <string name="export_bundle">දත්ත ගොනුව අපනයනය කරන්න</string>
     <string name="export_success">දත්ත ගොනුව සුරකින ලදී: %1$s</string>
+    <string name="export_lessons">උගත් පාඩම් ලොගය අපනයනය කරන්න (%1$d)</string>
+    <string name="export_lessons_success">පාඩම් ලොගය සුරකින ලදී: %1$s</string>
+    <string name="export_lessons_failed">පාඩම් ලොගය අපනයනය අසාර්ථක විය</string>
 </resources>

@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.sellipi.companion.domain.lessons.AlignmentMode
+import org.sellipi.companion.domain.lessons.AlignmentSessionTracker
+import org.sellipi.companion.domain.lessons.LessonRepository
 import org.sellipi.companion.domain.model.GlyphOccurrence
 import org.sellipi.companion.domain.model.Inscription
 import org.sellipi.companion.domain.model.InscriptionQuad
@@ -17,6 +20,7 @@ import org.sellipi.companion.domain.model.QuadPoint
 import org.sellipi.companion.domain.model.TranscriptionLine
 import org.sellipi.companion.domain.usecase.GetInscriptionDetailsUseCase
 import org.sellipi.companion.engine.homography.HomographyCalculator
+import java.util.Calendar
 
 data class CameraOverlayUiState(
     val inscription: Inscription? = null,
@@ -36,8 +40,15 @@ data class CameraOverlayUiState(
 class CameraOverlayViewModel(
     private val inscriptionId: String,
     private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase,
+    private val lessonRepo: LessonRepository,
     private val homographyCalculator: HomographyCalculator = HomographyCalculator()
 ) : ViewModel() {
+
+    private val alignmentTracker = AlignmentSessionTracker(
+        mode = AlignmentMode.OVERLAY,
+        clock = System::currentTimeMillis,
+        localHour = { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
+    )
 
     private val _inscription = MutableStateFlow<Inscription?>(null)
     private val _quad = MutableStateFlow(
@@ -75,6 +86,7 @@ class CameraOverlayViewModel(
     )
 
     init {
+        alignmentTracker.onInitialQuad(_quad.value)
         viewModelScope.launch {
             _inscription.value = getInscriptionDetailsUseCase.getInscription(inscriptionId)
         }
@@ -90,6 +102,15 @@ class CameraOverlayViewModel(
             3 -> current.copy(bottomLeft = point)
             else -> current
         }
+        alignmentTracker.onQuadChanged(_quad.value)
+    }
+
+    fun onCornerDragFinished() {
+        alignmentTracker.onCornerDragFinished()
+    }
+
+    fun onViewportSize(width: Float, height: Float) {
+        alignmentTracker.onViewportSize(width, height)
     }
 
     fun toggleFreezeFrame() {
@@ -108,24 +129,32 @@ class CameraOverlayViewModel(
                     )
                 ) {
                     _selectedGlyph.value = glyph
+                    alignmentTracker.onGlyphTap(hit = true)
                     return
                 }
             }
         }
         _selectedGlyph.value = null
+        alignmentTracker.onGlyphTap(hit = false)
     }
 
     fun dismissGlyphSheet() {
         _selectedGlyph.value = null
     }
 
+    override fun onCleared() {
+        alignmentTracker.finish().forEach { lessonRepo.record(it, inscriptionId) }
+        super.onCleared()
+    }
+
     class Factory(
         private val inscriptionId: String,
-        private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase
+        private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase,
+        private val lessonRepo: LessonRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return CameraOverlayViewModel(inscriptionId, getInscriptionDetailsUseCase) as T
+            return CameraOverlayViewModel(inscriptionId, getInscriptionDetailsUseCase, lessonRepo) as T
         }
     }
 }

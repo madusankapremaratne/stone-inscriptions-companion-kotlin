@@ -10,12 +10,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.sellipi.companion.domain.lessons.AlignmentMode
+import org.sellipi.companion.domain.lessons.AlignmentSessionTracker
+import org.sellipi.companion.domain.lessons.LessonRepository
 import org.sellipi.companion.domain.model.Inscription
 import org.sellipi.companion.domain.model.TranscriptionLine
 import org.sellipi.companion.domain.usecase.GetInscriptionDetailsUseCase
 import org.sellipi.companion.engine.ar.ArCoreSessionManager
 import org.sellipi.companion.engine.ar.ArTrackedTarget
 import org.sellipi.companion.engine.ar.ArTrackingStatus
+import java.util.Calendar
 
 data class ArUiState(
     val inscription: Inscription? = null,
@@ -29,8 +33,15 @@ data class ArUiState(
 class ArViewModel(
     private val inscriptionId: String,
     private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase,
-    val arSessionManager: ArCoreSessionManager
+    val arSessionManager: ArCoreSessionManager,
+    private val lessonRepo: LessonRepository
 ) : ViewModel() {
+
+    private val alignmentTracker = AlignmentSessionTracker(
+        mode = AlignmentMode.AR,
+        clock = System::currentTimeMillis,
+        localHour = { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
+    )
 
     private val _inscription = MutableStateFlow<Inscription?>(null)
     private val _isArSupported = MutableStateFlow(true)
@@ -63,16 +74,31 @@ class ArViewModel(
                 _isArSupported.value = supported
             }
         }
+        viewModelScope.launch {
+            arSessionManager.trackingStatus.collect { status ->
+                if (status == ArTrackingStatus.TRACKING_SURFACE) alignmentTracker.onTrackingAcquired()
+            }
+        }
+    }
+
+    fun onFallbackToOverlay() {
+        alignmentTracker.onFallbackToOverlay()
+    }
+
+    override fun onCleared() {
+        alignmentTracker.finish().forEach { lessonRepo.record(it, inscriptionId) }
+        super.onCleared()
     }
 
     class Factory(
         private val inscriptionId: String,
         private val getInscriptionDetailsUseCase: GetInscriptionDetailsUseCase,
-        private val arSessionManager: ArCoreSessionManager
+        private val arSessionManager: ArCoreSessionManager,
+        private val lessonRepo: LessonRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ArViewModel(inscriptionId, getInscriptionDetailsUseCase, arSessionManager) as T
+            return ArViewModel(inscriptionId, getInscriptionDetailsUseCase, arSessionManager, lessonRepo) as T
         }
     }
 }

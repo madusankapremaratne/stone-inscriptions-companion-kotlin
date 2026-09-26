@@ -5,6 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -14,11 +16,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import org.sellipi.companion.core.common.AppLanguage
 import org.sellipi.companion.core.navigation.Screen
+import org.sellipi.companion.data.lessons.FileLessonExportSink
+import org.sellipi.companion.data.lessons.LessonRepositoryImpl
+import org.sellipi.companion.data.lessons.appVersionOf
 import org.sellipi.companion.data.local.database.SellipiDatabase
 import org.sellipi.companion.data.repository.EvolutionRepositoryImpl
 import org.sellipi.companion.data.repository.InscriptionRepositoryImpl
 import org.sellipi.companion.data.repository.ResearcherCaptureRepositoryImpl
 import org.sellipi.companion.data.repository.SiteRepositoryImpl
+import org.sellipi.companion.domain.lessons.ExportLessonsUseCase
 import org.sellipi.companion.domain.usecase.GetInscriptionDetailsUseCase
 import org.sellipi.companion.domain.usecase.GetLetterEvolutionUseCase
 import org.sellipi.companion.domain.usecase.GetNearbySitesUseCase
@@ -62,6 +68,11 @@ fun SellipiNavHost(
     val getLetterEvolutionUseCase = GetLetterEvolutionUseCase(evolutionRepo)
     val saveResearcherCaptureUseCase = SaveResearcherCaptureUseCase(captureRepo)
 
+    val lessonRepo = remember { LessonRepositoryImpl.getInstance(context, SellipiDatabase.CONTENT_VERSION) }
+    val exportLessonsUseCase = remember {
+        ExportLessonsUseCase(lessonRepo, FileLessonExportSink(context), appVersionOf(context))
+    }
+
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
@@ -71,11 +82,15 @@ fun SellipiNavHost(
         // 1. Home Explorer Screen
         composable(Screen.Home.route) {
             val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.Factory(getNearbySitesUseCase, inscriptionRepo, sensorEngine)
+                factory = HomeViewModel.Factory(getNearbySitesUseCase, inscriptionRepo, sensorEngine, lessonRepo)
             )
+            LaunchedEffect(Unit) { homeViewModel.onScreenShown() }
             HomeScreen(
                 viewModel = homeViewModel,
-                onNavigateToInscription = { id -> navController.navigate(Screen.InscriptionDetail.createRoute(id)) },
+                onNavigateToInscription = { id ->
+                    homeViewModel.onInscriptionSelected(id)
+                    navController.navigate(Screen.InscriptionDetail.createRoute(id))
+                },
                 onNavigateToEvolution = { navController.navigate(Screen.LetterEvolution.createRoute("L01")) },
                 onNavigateToResearcher = { navController.navigate(Screen.ResearcherCapture.createRoute("INSC_ACTIVE")) },
                 currentLanguage = currentLanguage,
@@ -114,7 +129,7 @@ fun SellipiNavHost(
         ) { backStackEntry ->
             val inscriptionId = backStackEntry.arguments?.getString("inscriptionId") ?: "INSC_ANP_01"
             val overlayViewModel: CameraOverlayViewModel = viewModel(
-                factory = CameraOverlayViewModel.Factory(inscriptionId, getInscriptionDetailsUseCase)
+                factory = CameraOverlayViewModel.Factory(inscriptionId, getInscriptionDetailsUseCase, lessonRepo)
             )
             CameraOverlayScreen(
                 viewModel = overlayViewModel,
@@ -132,12 +147,13 @@ fun SellipiNavHost(
         ) { backStackEntry ->
             val inscriptionId = backStackEntry.arguments?.getString("inscriptionId") ?: "INSC_ANP_01"
             val arViewModel: ArViewModel = viewModel(
-                factory = ArViewModel.Factory(inscriptionId, getInscriptionDetailsUseCase, arSessionManager)
+                factory = ArViewModel.Factory(inscriptionId, getInscriptionDetailsUseCase, arSessionManager, lessonRepo)
             )
             ArViewScreen(
                 viewModel = arViewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onFallbackToOverlay = { id ->
+                    arViewModel.onFallbackToOverlay()
                     navController.popBackStack()
                     navController.navigate(Screen.OverlayMode.createRoute(id))
                 }
@@ -170,7 +186,9 @@ fun SellipiNavHost(
         ) { backStackEntry ->
             val inscriptionId = backStackEntry.arguments?.getString("inscriptionId") ?: "INSC_ACTIVE"
             val researcherViewModel: ResearcherCaptureViewModel = viewModel(
-                factory = ResearcherCaptureViewModel.Factory(inscriptionId, saveResearcherCaptureUseCase, sensorEngine)
+                factory = ResearcherCaptureViewModel.Factory(
+                    inscriptionId, saveResearcherCaptureUseCase, sensorEngine, lessonRepo, exportLessonsUseCase
+                )
             )
             ResearcherCaptureScreen(
                 viewModel = researcherViewModel,

@@ -31,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -313,6 +314,37 @@ fun ResearcherCaptureScreen(
                         text = stringResource(R.string.export_success, state.exportedBundlePath!!),
                         style = MaterialTheme.typography.bodySmall,
                         color = AttestedGreen
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Lessons log export (docs/slm-lessons-architecture.md, Phase 0)
+                OutlinedButton(
+                    onClick = viewModel::exportLessons,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.FileDownload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.export_lessons, state.lessonCount))
+                }
+
+                state.exportedLessonsPath?.let { path ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.export_lessons_success, path),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AttestedGreen
+                    )
+                }
+
+                if (state.lessonsExportFailed) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.export_lessons_failed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }

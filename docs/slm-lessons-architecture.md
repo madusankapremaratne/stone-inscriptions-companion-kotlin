@@ -235,6 +235,27 @@ curation_log    (curator-only: lesson_id, decision, pack_version, note)
 
 **Why this order:** P0 and P1 deliver value and thesis data without the SLM; the SLM (P2) is the riskiest and least essential component, so it lands on top of a working extractive baseline.
 
+### 8.1 Phase 0 — Implementation Notes
+
+| Component | Location |
+|---|---|
+| Payloads, codec, session tracker (pure Kotlin, unit tested) | `domain/lessons/` |
+| Lessons Room DB (`sellipi_lessons.db`), repository, export sink | `data/lessons/` |
+| Overlay session capture (taps, quad drags, viewport) | `CameraOverlayViewModel`, `CameraOverlayScreen` |
+| AR session capture (tracking acquired, fallback to Overlay) | `ArViewModel`, `SellipiNavHost` |
+| Manual identification capture | `HomeViewModel`, `SellipiNavHost` |
+| Export button + lesson count | `ResearcherCaptureScreen` → `Android/data/org.sellipi.companion/files/exports/` |
+
+**Signal definitions and known limits**
+
+- `AlignmentOutcome.success` = alignment *confirmed* (≥1 glyph tap hit, or ARCore acquired the surface). A visitor who aligns but never taps reads as unconfirmed.
+- `glyphTapMisses` counts every tap that hits no bounding box, including taps used to dismiss the glyph sheet. Treat it as a noisy proxy for "letters the visitor could not reach".
+- AR success is currently always `false`: `ArCoreSessionManager.onArFrameUpdated` is not yet driven by a frame loop. The lessons will record that honestly until AR tracking is wired.
+- Every Home pick is logged as `IdentificationRecovery`, because no automatic identification exists yet. Once AR/geofence auto-ID ships, add an `attemptedMethod` field (payload schema v2).
+- The Home inscription list is ordered by date (`date_range_start`), not proximity, and `GetNearbySitesUseCase` is invoked once with null coordinates, so location never reorders it. `rankInList` therefore measures position in a chronological list today; re-baseline this metric once proximity ranking lands.
+- Lessons are stored with `trust = OBSERVED`, `synced_at = null`; sync arrives in P3.
+- Room exports the lessons schema to `app/schemas/`. Commit it after the first build; it is the baseline for future migration tests.
+
 ---
 
 ## 9. Open Decisions

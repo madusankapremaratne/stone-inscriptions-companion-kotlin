@@ -31,7 +31,7 @@ import org.sellipi.companion.data.local.entity.TranscriptionLineEntity
         GlyphOccurrenceEntity::class,
         CaptureSessionEntity::class
     ],
-    version = 1,
+    version = SellipiDatabase.CONTENT_VERSION,
     exportSchema = false
 )
 abstract class SellipiDatabase : RoomDatabase() {
@@ -44,6 +44,9 @@ abstract class SellipiDatabase : RoomDatabase() {
     abstract fun captureDao(): CaptureDao
 
     companion object {
+        /** Content pack version; stamped on every lesson so lessons can be attributed to a release. */
+        const val CONTENT_VERSION = 1
+
         @Volatile
         private var INSTANCE: SellipiDatabase? = null
 

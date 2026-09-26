@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.sellipi.companion.domain.lessons.ExportLessonsUseCase
+import org.sellipi.companion.domain.lessons.LessonRepository
 import org.sellipi.companion.domain.model.CaptureSession
 import org.sellipi.companion.domain.usecase.SaveResearcherCaptureUseCase
 import org.sellipi.companion.engine.sensor.SensorFusionEngine
@@ -22,13 +24,18 @@ data class ResearcherUiState(
     val currentGpsLon: Double = 80.5097,
     val currentGpsAccuracy: Float = 2.4f,
     val permitReference: String = "ARCH-PERMIT-2026-RESEARCH",
-    val exportedBundlePath: String? = null
+    val exportedBundlePath: String? = null,
+    val lessonCount: Int = 0,
+    val exportedLessonsPath: String? = null,
+    val lessonsExportFailed: Boolean = false
 )
 
 class ResearcherCaptureViewModel(
     private val inscriptionId: String = "INSC_ACTIVE",
     private val saveCaptureUseCase: SaveResearcherCaptureUseCase,
-    private val sensorEngine: SensorFusionEngine
+    private val sensorEngine: SensorFusionEngine,
+    private val lessonRepo: LessonRepository,
+    private val exportLessonsUseCase: ExportLessonsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ResearcherUiState())
@@ -36,6 +43,11 @@ class ResearcherCaptureViewModel(
 
     init {
         refreshSensors()
+        viewModelScope.launch {
+            lessonRepo.observeCount().collect { count ->
+                _uiState.value = _uiState.value.copy(lessonCount = count)
+            }
+        }
     }
 
     fun unlockWithPasscode(passcode: String) {
@@ -91,14 +103,28 @@ class ResearcherCaptureViewModel(
         )
     }
 
+    fun exportLessons() {
+        viewModelScope.launch {
+            val result = runCatching { exportLessonsUseCase() }
+            _uiState.value = _uiState.value.copy(
+                exportedLessonsPath = result.getOrNull()?.path,
+                lessonsExportFailed = result.isFailure
+            )
+        }
+    }
+
     class Factory(
         private val inscriptionId: String,
         private val saveCaptureUseCase: SaveResearcherCaptureUseCase,
-        private val sensorEngine: SensorFusionEngine
+        private val sensorEngine: SensorFusionEngine,
+        private val lessonRepo: LessonRepository,
+        private val exportLessonsUseCase: ExportLessonsUseCase
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ResearcherCaptureViewModel(inscriptionId, saveCaptureUseCase, sensorEngine) as T
+            return ResearcherCaptureViewModel(
+                inscriptionId, saveCaptureUseCase, sensorEngine, lessonRepo, exportLessonsUseCase
+            ) as T
         }
     }
 }

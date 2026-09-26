@@ -65,4 +65,7 @@
     <string name="telemetry_gps">GPS அமைவிடம்</string>
     <string name="export_bundle">தரவுத் தொகுப்பை ஏற்றுமதி செய்க</string>
     <string name="export_success">கோப்பு சேமிக்கப்பட்டது: %1$s</string>
+    <string name="export_lessons">கற்ற பாடங்கள் பதிவை ஏற்றுமதி செய்க (%1$d)</string>
+    <string name="export_lessons_success">பாடங்கள் பதிவு சேமிக்கப்பட்டது: %1$s</string>
+    <string name="export_lessons_failed">பாடங்கள் பதிவு ஏற்றுமதி தோல்வியடைந்தது</string>
 </resources>

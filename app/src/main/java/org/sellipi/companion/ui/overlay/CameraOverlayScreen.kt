@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -142,6 +143,9 @@ fun CameraOverlayScreen(
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
+                    .onSizeChanged { size ->
+                        viewModel.onViewportSize(size.width.toFloat(), size.height.toFloat())
+                    }
                     .pointerInput(Unit) {
                         detectTapGestures { offset ->
                             viewModel.onTouchScreen(offset.x, offset.y)
@@ -178,7 +182,10 @@ fun CameraOverlayScreen(
                                     )
                                 }
                             },
-                            onDragEnd = { draggingCorner = -1 },
+                            onDragEnd = {
+                                if (draggingCorner != -1) viewModel.onCornerDragFinished()
+                                draggingCorner = -1
+                            },
                             onDragCancel = { draggingCorner = -1 }
                         )
                     }
