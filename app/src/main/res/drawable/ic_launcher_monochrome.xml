@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 13+ themed icon: tablet silhouette with the lines cut out. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M34,80 L34,44 C34,34 43,28 54,28 C65,28 74,34 74,44 L74,80 Z M42,46h24v4h-24z M42,56h24v4h-24z M42,66h16v4h-16z" />
+</vector>

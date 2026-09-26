@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stone tablet with incised inscription lines. Kept inside the 66dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Tablet with a rounded top -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M34,80 L34,44 C34,34 43,28 54,28 C65,28 74,34 74,44 L74,80 Z" />
+    <!-- Incised lines -->
+    <path
+        android:fillColor="#4E210E"
+        android:pathData="M42,46h24v4h-24z M42,56h24v4h-24z M42,66h16v4h-16z" />
+</vector>
