@@ -69,7 +69,7 @@ fun AskScreen(
     val state by viewModel.uiState.collectAsState()
     val keyboard = LocalSoftwareKeyboardController.current
     val language = currentLanguage.toContentLanguage()
-    val submit = {
+    val submit: () -> Unit = {
         viewModel.submit(language)
         keyboard?.hide()
     }
