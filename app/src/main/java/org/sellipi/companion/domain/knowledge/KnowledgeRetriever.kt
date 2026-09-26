@@ -21,6 +21,9 @@ class KnowledgeRetriever(
     private class IndexedCard(val card: KnowledgeCard, val titleTokens: Set<String>, val bodyTokens: Set<String>)
 
     private val cards: Map<String, IndexedCard>
+
+    /** Cards this retriever may return (drafts excluded unless enabled); the router's catalogue. */
+    val visibleCards: List<KnowledgeCard> get() = cards.values.map { it.card }
     private val aliases: List<IndexedAlias>
     private val linksByCard: Map<String, List<CardLink>>
 

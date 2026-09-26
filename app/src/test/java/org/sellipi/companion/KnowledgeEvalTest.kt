@@ -84,6 +84,7 @@ class KnowledgeEvalTest {
             val score = when (answer) {
                 is KnowledgeAnswer.Found -> answer.cards.first().score
                 is KnowledgeAnswer.NotInRecords -> answer.topScore
+                is KnowledgeAnswer.Generated -> error("retriever never generates")
             }
             val ok = if (question.expect.isEmpty()) got == null else got in question.expect
             if (question.expect.isNotEmpty()) answerable++

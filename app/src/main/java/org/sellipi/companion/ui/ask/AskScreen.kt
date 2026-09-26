@@ -1,5 +1,10 @@
 package org.sellipi.companion.ui.ask
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,9 +69,11 @@ fun AskScreen(
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
     isSunlightMode: Boolean,
-    onToggleSunlightMode: () -> Unit
+    onToggleSunlightMode: () -> Unit,
+    onOpenOnDeviceAi: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+    val modelAvailability by viewModel.modelAvailability.collectAsState()
     val keyboard = LocalSoftwareKeyboardController.current
     val language = currentLanguage.toContentLanguage()
     val submit: () -> Unit = {
@@ -101,7 +108,7 @@ fun AskScreen(
                     onValueChange = viewModel::onQueryChanged,
                     placeholder = { Text(stringResource(R.string.ask_hint)) },
                     trailingIcon = {
-                        IconButton(onClick = submit, enabled = !state.isLoading && state.query.isNotBlank()) {
+                        IconButton(onClick = submit, enabled = !state.isLoading && !state.isAnswering && state.query.isNotBlank()) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Send,
                                 contentDescription = stringResource(R.string.ask_submit),
@@ -121,7 +128,27 @@ fun AskScreen(
                 )
             }
 
+            item { ModelStatusCard(availability = modelAvailability, onClick = onOpenOnDeviceAi) }
+
             when {
+                state.isAnswering -> item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(24.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(color = TerracottaPrimary, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(
+                                if (modelAvailability == ModelAvailability.READY) R.string.ask_thinking_on_device else R.string.ask_searching
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
                 state.isLoading -> item {
                     Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = TerracottaPrimary)
@@ -143,8 +170,19 @@ fun AskScreen(
                         NoticeCard(stringResource(R.string.ask_not_in_records))
                     }
 
-                    is KnowledgeAnswer.Found -> items(answer.cards, key = { it.card.id }) { scored ->
-                        AnswerCard(card = scored.card, language = language)
+                    is KnowledgeAnswer.Found -> {
+                        if (answer.routedByModel) item { SectionLabel(stringResource(R.string.ask_possibly_related)) }
+                        items(answer.cards, key = { it.card.id }) { scored ->
+                            AnswerCard(card = scored.card, language = language)
+                        }
+                    }
+
+                    is KnowledgeAnswer.Generated -> {
+                        item { GeneratedAnswerCard(text = answer.text) }
+                        item { SectionLabel(stringResource(R.string.ask_generated_sources)) }
+                        itemsIndexed(answer.sources, key = { _, scored -> scored.card.id }) { index, scored ->
+                            AnswerCard(card = scored.card, language = language, sourceNumber = index + 1)
+                        }
                     }
                 }
             }
@@ -153,7 +191,72 @@ fun AskScreen(
 }
 
 @Composable
-private fun AnswerCard(card: KnowledgeCard, language: ContentLanguage) {
+private fun ModelStatusCard(availability: ModelAvailability, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = GoldPatina)
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = stringResource(
+                    when (availability) {
+                        ModelAvailability.READY -> R.string.ask_model_on
+                        ModelAvailability.OFFER_DOWNLOAD -> R.string.ask_model_offer
+                        ModelAvailability.IN_PROGRESS -> R.string.ask_model_downloading
+                        ModelAvailability.UNAVAILABLE -> R.string.ask_model_unavailable
+                    }
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun GeneratedAnswerCard(text: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = GoldPatina, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.ask_generated_label),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = GoldPatina
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.ask_generated_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun AnswerCard(card: KnowledgeCard, language: ContentLanguage, sourceNumber: Int? = null) {
     val localizedBody = card.body(language)
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -167,7 +270,7 @@ private fun AnswerCard(card: KnowledgeCard, language: ContentLanguage) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = card.title(language),
+                    text = if (sourceNumber != null) "[$sourceNumber] ${card.title(language)}" else card.title(language),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = GoldPatina,
                     modifier = Modifier.weight(1f)

@@ -7,7 +7,10 @@ import kotlinx.serialization.Serializable
  * Lessons are structured observations of where the app fell short (see docs/slm-lessons-architecture.md §5).
  * Everything in this package is plain Kotlin so it can be unit tested without Android.
  */
-enum class LessonType { ALIGNMENT_OUTCOME, ALIGNMENT_CORRECTION, IDENTIFICATION_RECOVERY, KNOWLEDGE_GAP, ALIAS_MISS }
+enum class LessonType {
+    ALIGNMENT_OUTCOME, ALIGNMENT_CORRECTION, IDENTIFICATION_RECOVERY, KNOWLEDGE_GAP, ALIAS_MISS,
+    MODEL_ROUTING, GENERATION_OUTCOME
+}
 
 /** observed = automatic telemetry, proposed = awaiting curator, verified = curator-approved. */
 enum class LessonTrust { OBSERVED, PROPOSED, VERIFIED }
@@ -93,6 +96,33 @@ data class AliasMiss(
     val msBetween: Long
 ) : LessonPayload
 
+/**
+ * Deterministic retrieval missed but the on-device model routed the question to [cardIds].
+ * The curator can add the wording as an alias so retrieval handles it next release:
+ * the model's successes become deterministic knowledge.
+ */
+@Serializable
+@SerialName("model_routing")
+data class ModelRouting(
+    val queryNorm: String,
+    val cardIds: List<String>,
+    val latencyMs: Long
+) : LessonPayload
+
+/**
+ * One attempt by the on-device model to write an answer. [verdict] is an AnswerVerdict name,
+ * or ERROR / TIMEOUT. Rejection rates by verdict are the hallucination-guard metric.
+ */
+@Serializable
+@SerialName("generation_outcome")
+data class GenerationOutcome(
+    val verdict: String,
+    val latencyMs: Long,
+    val backend: String,
+    val sourceCount: Int,
+    val routedByModel: Boolean
+) : LessonPayload
+
 val LessonPayload.type: LessonType
     get() = when (this) {
         is AlignmentOutcome -> LessonType.ALIGNMENT_OUTCOME
@@ -100,6 +130,8 @@ val LessonPayload.type: LessonType
         is IdentificationRecovery -> LessonType.IDENTIFICATION_RECOVERY
         is KnowledgeGap -> LessonType.KNOWLEDGE_GAP
         is AliasMiss -> LessonType.ALIAS_MISS
+        is ModelRouting -> LessonType.MODEL_ROUTING
+        is GenerationOutcome -> LessonType.GENERATION_OUTCOME
     }
 
 data class Lesson(

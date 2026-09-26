@@ -76,9 +76,26 @@ data class ScoredCard(
 sealed interface KnowledgeAnswer {
     val normalizedQuery: String
 
+    /**
+     * Curated cards shown verbatim. [routedByModel] means deterministic retrieval missed and the
+     * on-device model picked these cards; the UI labels them as possibly related.
+     */
     data class Found(
         override val normalizedQuery: String,
-        val cards: List<ScoredCard>
+        val cards: List<ScoredCard>,
+        val routedByModel: Boolean = false
+    ) : KnowledgeAnswer
+
+    /**
+     * A short English answer written by the on-device model from [sources], which passed the
+     * citation and grounding checks. [text] carries [n] markers indexing into [sources] (1-based).
+     * The sources are always shown with it so the visitor can check the answer.
+     */
+    data class Generated(
+        override val normalizedQuery: String,
+        val text: String,
+        val sources: List<ScoredCard>,
+        val routedByModel: Boolean
     ) : KnowledgeAnswer
 
     /** Abstain: nothing in the curated record answers this. Never guess. */

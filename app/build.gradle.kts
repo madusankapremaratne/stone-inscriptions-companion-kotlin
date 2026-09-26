@@ -36,16 +36,24 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
+    }
+    sourceSets {
+        // The Q-dev question set ships only in debug builds, for the on-device evaluation screen.
+        getByName("debug").assets.srcDirs("$rootDir/data/knowledge/eval")
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    // kotlinOptions {} is an error from Kotlin 2.2; compilerOptions replaces it.
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -88,6 +96,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.security.crypto)
     implementation(libs.kotlinx.serialization.json)
+
+    // On-device LLM runtime (Gemma via LiteRT-LM)
+    implementation(libs.google.litertlm.android)
 
     // Testing
     testImplementation(libs.junit)

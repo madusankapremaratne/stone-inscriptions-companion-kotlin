@@ -18,6 +18,7 @@ import androidx.navigation.navArgument
 import org.sellipi.companion.core.common.AppLanguage
 import org.sellipi.companion.core.navigation.Screen
 import org.sellipi.companion.data.lessons.FileLessonExportSink
+import org.sellipi.companion.data.llm.LlmProvider
 import org.sellipi.companion.data.lessons.LessonRepositoryImpl
 import org.sellipi.companion.data.lessons.appVersionOf
 import org.sellipi.companion.data.local.database.SellipiDatabase
@@ -42,6 +43,10 @@ import org.sellipi.companion.ui.evolution.LetterEvolutionViewModel
 import org.sellipi.companion.ui.home.HomeScreen
 import org.sellipi.companion.ui.home.HomeViewModel
 import org.sellipi.companion.ui.inscription.InscriptionDetailScreen
+import org.sellipi.companion.ui.ondeviceai.KnowledgeEvalScreen
+import org.sellipi.companion.ui.ondeviceai.KnowledgeEvalViewModel
+import org.sellipi.companion.ui.ondeviceai.OnDeviceAiScreen
+import org.sellipi.companion.ui.ondeviceai.OnDeviceAiViewModel
 import org.sellipi.companion.ui.inscription.InscriptionDetailViewModel
 import org.sellipi.companion.ui.overlay.CameraOverlayScreen
 import org.sellipi.companion.ui.overlay.CameraOverlayViewModel
@@ -75,6 +80,7 @@ fun SellipiNavHost(
 
     val lessonRepo = remember { LessonRepositoryImpl.getInstance(context, SellipiDatabase.CONTENT_VERSION) }
     val knowledgeRepo = remember { KnowledgeRepositoryImpl(db) }
+    val llmProvider = remember { LlmProvider.getInstance(context) }
     // Draft (unreviewed) cards are visible only in debuggable builds, for curator review.
     val showDraftKnowledge = remember { (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 }
     val exportLessonsUseCase = remember {
@@ -200,7 +206,7 @@ fun SellipiNavHost(
         ) { backStackEntry ->
             val inscriptionId = backStackEntry.arguments?.getString("inscriptionId")
             val askViewModel: AskViewModel = viewModel(
-                factory = AskViewModel.Factory(inscriptionId, knowledgeRepo, inscriptionRepo, lessonRepo, showDraftKnowledge)
+                factory = AskViewModel.Factory(inscriptionId, knowledgeRepo, inscriptionRepo, lessonRepo, llmProvider, showDraftKnowledge)
             )
             AskScreen(
                 viewModel = askViewModel,
@@ -208,8 +214,37 @@ fun SellipiNavHost(
                 currentLanguage = currentLanguage,
                 onLanguageSelected = onLanguageSelected,
                 isSunlightMode = isSunlightMode,
+                onToggleSunlightMode = onToggleSunlightMode,
+                onOpenOnDeviceAi = { navController.navigate(Screen.OnDeviceAi.route) }
+            )
+        }
+
+        // On-device AI: model download, licence, backend
+        composable(Screen.OnDeviceAi.route) {
+            val onDeviceAiViewModel: OnDeviceAiViewModel = viewModel(factory = OnDeviceAiViewModel.Factory(llmProvider))
+            OnDeviceAiScreen(
+                viewModel = onDeviceAiViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onOpenEvaluation = if (showDraftKnowledge) {
+                    { navController.navigate(Screen.KnowledgeEval.route) }
+                } else {
+                    null
+                },
+                currentLanguage = currentLanguage,
+                onLanguageSelected = onLanguageSelected,
+                isSunlightMode = isSunlightMode,
                 onToggleSunlightMode = onToggleSunlightMode
             )
+        }
+
+        // Q-dev evaluation on the phone (debuggable builds only; q_dev.json ships in debug assets)
+        if (showDraftKnowledge) {
+            composable(Screen.KnowledgeEval.route) {
+                val evalViewModel: KnowledgeEvalViewModel = viewModel(
+                    factory = KnowledgeEvalViewModel.Factory(context.applicationContext, knowledgeRepo, llmProvider, FileLessonExportSink(context))
+                )
+                KnowledgeEvalScreen(viewModel = evalViewModel, onNavigateBack = { navController.popBackStack() })
+            }
         }
 
         // 7. Researcher Field Capture Screen

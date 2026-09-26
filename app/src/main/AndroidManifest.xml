@@ -14,6 +14,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Used only for the user-initiated, Wi-Fi-only on-device AI model download.
+         Nothing else in the app touches the network. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".SellipiApplication"
         android:allowBackup="true"
@@ -23,6 +28,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sellipi"
         tools:targetApi="35">
+
+        <!-- LiteRT-LM GPU backend: optional vendor libraries -->
+        <uses-native-library android:name="libvndksupport.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
 
         <!-- ARCore metadata: optional so it installs on all devices -->
         <meta-data

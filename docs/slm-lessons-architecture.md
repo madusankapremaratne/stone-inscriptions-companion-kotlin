@@ -229,7 +229,7 @@ curation_log    (curator-only: lesson_id, decision, pack_version, note)
 |---|---|---|
 | **P0 — Instrument** | Lessons DB, `AlignmentOutcome`, `AlignmentCorrection`, `IdentificationRecovery` capture; local export | Lessons recorded in a field test; no UI regression |
 | **P1 — Knowledge pack** | `KNOWLEDGE_CARD`, `ENTITY_ALIAS`, `CARD_LINK`, in-memory retriever; ~50 seed cards; extractive Q&A (no SLM) | Q&A works on all devices; Q-dev built |
-| **P2 — Grounded SLM** | Gemma 3 1B on-demand delivery, capability gate, cascade, citation post-check | Hallucination rate on Q-dev within target; thermal fallback verified |
+| **P2 — Grounded SLM** | Gemma 3 1B via LiteRT-LM, in-app Wi-Fi download with SHA-256 pin, capability gate, model router + grounded answers with verifier, on-device evaluation | Zero wrong answers on Q-dev with the model; latency measured on both test phones |
 | **P3 — Sync & curation** | Supabase tables + RLS, WorkManager sync, consent UI, pack registry, `build_database.py` merge | End-to-end: lesson → verified → pack vN+1 on device |
 | **P4 — Local adaptation** | Default-mode selection, seeded quads, local aliases | Measurable time-to-align improvement on repeat sessions |
 | **P5 — Evaluation** | Frozen Q-test, per-release reports, ablation | Thesis chapter data |
@@ -289,4 +289,52 @@ curation_log    (curator-only: lesson_id, decision, pack_version, note)
 **Known limits (Q-dev seed, 29 questions).** Grounded answer rate 0.90, abstention precision 0.82, zero wrong answers. The two failures are name-free questions ("Who brought Buddhism to Sri Lanka?"), which abstain because keyword overlap alone rarely clears the threshold. These numbers are circular: the same author wrote the cards and the questions. Real visitor questions are the first thing Q-dev needs.
 
 **Prepackaged database compatibility.** Room rejects a prepackaged database whose tables differ from its entities. The original `build_database.py` DDL had 13 mismatches: nullable `TEXT PRIMARY KEY` on all 8 tables and 5 hand-named `idx_*` indices. All content DDL now lives in `scripts/room_schema.py`, in Room's generated form, and both build scripts use it. The shipped asset was rebuilt with `scripts/migrate_asset_schema.py` (every row verified identical, no foreign-key violations). The asset keeps `PRAGMA user_version = 0` so that on first open Room runs its `CREATE ... IF NOT EXISTS` statements before validating. Checked here against a schema derived from the entity sources. After the first Gradle build, `python3 scripts/check_room_schema.py` checks against Room's own exported schema.
+
+### 8.3 Phase 2 — Implementation Notes
+
+**What the model does.** One generative model, two jobs, both constrained:
+
+| Job | When | Accepted output | Otherwise |
+|---|---|---|---|
+| Router | Deterministic retrieval found nothing | Catalogue IDs that exist (max 2) | Abstain |
+| Grounded answer | Cards found (English UI only) | ≤ 3 sentences, every sentence cited `[n]`, passes `AnswerVerifier` | Cards shown verbatim |
+
+`AnswerVerifier` rejects: no citation, citation out of range, an uncited sentence, a number not in the cited sources, or a sentence whose content words are more than 34% absent from its cited sources. It is lexical: it catches a small model's typical failures (invented dates, names, facts) but cannot prove faithfulness, so the evaluation report keeps each generated text for human rating. If the model reads routed cards and replies `ABSTAIN`, the question counts as a miss.
+
+**New lessons.** `MODEL_ROUTING` (retrieval missed, model found cards: the wording is an alias candidate, so the model's successes become deterministic knowledge in the next pack) and `GENERATION_OUTCOME` (verdict, latency, backend: the hallucination-guard rate).
+
+**Runtime and toolchain.** LiteRT-LM (`com.google.ai.edge.litertlm:litertlm-android:0.16.1`); MediaPipe LLM Inference is maintenance-only. 0.16.x is compiled with Kotlin 2.2, so the project moved to Kotlin 2.2.21, KSP 2.2.21-2.0.4 and Room 2.7.2. Staying on 0.16.x avoids 0.17's Kotlin 2.3 / KSP2-only / AGP 8.12 requirements. All LiteRT-LM calls live in `LiteRtLmEngine.kt`.
+
+**Model.** Gemma 3 1B int4 (`Gemma3-1B-IT_multi-prefill-seq_q4_ekv4096.litertlm`, ~550 MB, 4,096-token context). It is the only official Gemma small enough for 4 GB phones: Gemma 4's smallest on-device model (E2B) is 2.58 GB. CPU by default; GPU is an opt-in toggle, because a GPU driver fault can crash natively and cannot be caught.
+
+**Device gate.** 64-bit ARM and ≥ 3.5 GB RAM; generation is skipped when the phone reports severe thermal status. Everything else works without the model.
+
+**Delivery.** Google's Hugging Face repos are gated (login + licence acceptance), so the app downloads an ungated mirror and **only loads it if its SHA-256 equals the hash of Google's original file**. Download uses the system DownloadManager: Wi-Fi only, resumable, continues in the background. The licence notice and links are shown before download. `INTERNET` is used for nothing else.
+
+**On-device evaluation.** Debug builds bundle `q_dev.json` and add *On-device AI → Run Q-dev evaluation*: the same cascade, with and without the model, on the same questions. Reports are saved as JSON next to the lessons export.
+
+#### Mirror setup (one-time, curator)
+
+1. Sign in at huggingface.co, open `litert-community/Gemma3-1B-IT` and accept the Gemma licence.
+2. Open the file `Gemma3-1B-IT_multi-prefill-seq_q4_ekv4096.litertlm`. Copy the **SHA-256** and exact **size in bytes** shown on Google's page, and download the file.
+3. Check the download is intact: `shasum -a 256 <file>` must print Google's hash; `stat -f%z <file>` (macOS) gives the byte size.
+4. Create a **public** model repo under your account (e.g. `sellipi-gemma3-1b-it`). Upload, unmodified:
+   - the `.litertlm` file;
+   - `NOTICE` containing: *Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms*;
+   - a copy of the Gemma Terms of Use and a README stating the file is Google's unmodified original, with its SHA-256.
+
+   Redistribution conditions are in the Gemma Terms of Use; re-read the current text before publishing.
+5. In `data/llm/ModelCatalog.kt`, set `url` to `https://huggingface.co/<you>/<repo>/resolve/main/<file>`, and set `sha256` and `sizeBytes` to **Google's** values from step 2.
+6. Build, then in the app: Ask → on-device AI card → Download. A wrong or altered file is deleted after the hash check.
+
+#### Test plan (both phones)
+
+| Check | Galaxy M21 (4–6 GB, CPU) | Pixel 7 Pro (12 GB) |
+|---|---|---|
+| Download on Wi-Fi only; waits on mobile data | ✓ | ✓ |
+| Verified → Ready; survives app restart without re-hashing | ✓ | ✓ |
+| Q-dev: retrieval-only vs with model (save both reports) | ✓ CPU | ✓ CPU, then GPU |
+| Zero wrong answers with the model | ✓ | ✓ |
+| Median latency acceptable at a site (target set from these runs) | measure | measure |
+| Airplane mode after download: answers still work | ✓ | ✓ |
 

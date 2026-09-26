@@ -25,6 +25,11 @@ sealed class Screen(val route: String) {
             if (inscriptionId == null) "ask" else "ask?inscriptionId=$inscriptionId"
     }
 
+    data object OnDeviceAi : Screen("ondevice-ai")
+
+    /** Debug builds only. */
+    data object KnowledgeEval : Screen("knowledge-eval")
+
     data object ResearcherCapture : Screen("researcher/{inscriptionId}") {
         fun createRoute(inscriptionId: String) = "researcher/$inscriptionId"
     }
