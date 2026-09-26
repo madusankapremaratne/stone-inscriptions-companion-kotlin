@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.sellipi.companion.domain.lessons.LessonRepository
+import org.sellipi.companion.domain.lessons.identificationRecoveryOf
 import org.sellipi.companion.domain.model.Inscription
 import org.sellipi.companion.domain.model.Site
 import org.sellipi.companion.domain.repository.InscriptionRepository
@@ -27,8 +29,11 @@ data class HomeUiState(
 class HomeViewModel(
     private val getNearbySitesUseCase: GetNearbySitesUseCase,
     private val inscriptionRepo: InscriptionRepository,
-    private val sensorEngine: SensorFusionEngine
+    private val sensorEngine: SensorFusionEngine,
+    private val lessonRepo: LessonRepository
 ) : ViewModel() {
+
+    private var shownAt = System.currentTimeMillis()
 
     private val _searchQuery = MutableStateFlow("")
     private val _selectedSiteId = MutableStateFlow<String?>(null)
@@ -82,14 +87,33 @@ class HomeViewModel(
         _selectedSiteId.value = siteId
     }
 
+    /** Call each time Home enters composition, so selection time excludes time spent elsewhere. */
+    fun onScreenShown() {
+        shownAt = System.currentTimeMillis()
+    }
+
+    /** No automatic identification exists yet, so every pick from this list is a manual recovery. */
+    fun onInscriptionSelected(inscriptionId: String) {
+        val lesson = identificationRecoveryOf(
+            chosenId = inscriptionId,
+            visibleIds = uiState.value.allInscriptions.map { it.id },
+            searchQuery = _searchQuery.value,
+            selectedSiteId = _selectedSiteId.value,
+            locationAvailable = _userLat.value != null,
+            msToSelect = System.currentTimeMillis() - shownAt
+        )
+        lessonRepo.record(lesson, inscriptionId)
+    }
+
     class Factory(
         private val getNearbySitesUseCase: GetNearbySitesUseCase,
         private val inscriptionRepo: InscriptionRepository,
-        private val sensorEngine: SensorFusionEngine
+        private val sensorEngine: SensorFusionEngine,
+        private val lessonRepo: LessonRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return HomeViewModel(getNearbySitesUseCase, inscriptionRepo, sensorEngine) as T
+            return HomeViewModel(getNearbySitesUseCase, inscriptionRepo, sensorEngine, lessonRepo) as T
         }
     }
 }

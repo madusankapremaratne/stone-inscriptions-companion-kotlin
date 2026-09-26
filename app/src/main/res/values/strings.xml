@@ -65,4 +65,7 @@
     <string name="telemetry_gps">GPS Coordinates</string>
     <string name="export_bundle">Export Encrypted Dataset Bundle</string>
     <string name="export_success">Dataset saved to device storage: %1$s</string>
+    <string name="export_lessons">Export Lessons Log (%1$d)</string>
+    <string name="export_lessons_success">Lessons log saved: %1$s</string>
+    <string name="export_lessons_failed">Lessons export failed</string>
 </resources>

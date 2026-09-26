@@ -16,6 +16,7 @@ arcore = "1.45.0"
 sceneview = "2.2.1"
 playServicesLocation = "21.3.0"
 coroutines = "1.8.1"
+kotlinxSerialization = "1.7.3"
 securityCrypto = "1.1.0-alpha06"
 materialIconsExtended = "1.7.0"
 
@@ -53,6 +54,7 @@ sceneview-ar = { group = "io.github.sceneview", name = "arsceneview", version.re
 # Location & Security & Coroutines
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 
@@ -67,3 +69,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
